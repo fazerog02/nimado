@@ -1,5 +1,6 @@
 {
 	"name": "nimado",
+	"homepage": "https://fazerog02.github.io/nimado/",
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
