@@ -7,6 +7,7 @@ interface Props {
 	index: number
 	upIndex: Function
 	downIndex: Function
+	minimizeContent: Function
 	className?: string
 	style?: React.CSSProperties
 }
@@ -35,6 +36,7 @@ const StreamContainer = (props: Props) => {
 			index={props.index}
 			upIndex={() => props.upIndex()}
 			downIndex={() => props.downIndex()}
+			minimizeContent={() => props.minimizeContent()}
 		/>
 	)
 }

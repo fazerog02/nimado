@@ -14,9 +14,9 @@ const App = () => {
 		url_or_id: '',
 	})
 	const [activeContentDataList, setActiveContentDataList] = useState<ContentData[]>([])
+	const [minimizedContentDataList, setMinimizedContentDataList] = useState<ContentData[]>([])
 
 	const upIndex = (target: number) => {
-		console.log(target, 'up')
 		if (target >= activeContentDataList.length - 1 || target < 0) return
 		let new_streamerDataList = activeContentDataList.slice()
 		const target_indexes = [-1, -1]
@@ -30,7 +30,6 @@ const App = () => {
 	}
 
 	const downIndex = (target: number) => {
-		console.log(target, 'down')
 		if (target < 1 || target >= activeContentDataList.length) return
 		let new_streamerDataList = activeContentDataList.slice()
 		const target_indexes = [-1, -1]
@@ -41,6 +40,25 @@ const App = () => {
 		new_streamerDataList[target_indexes[0]].index = target
 		new_streamerDataList[target_indexes[1]].index = target - 1
 		setActiveContentDataList(new_streamerDataList)
+	}
+
+	const minimizeContent = (target: number) => {
+		if (target < 0 || target >= activeContentDataList.length) return
+		const new_activeContentDataList = activeContentDataList.slice()
+		let target_arr_index = -1
+		new_activeContentDataList.forEach((data: ContentData, index: number) => {
+			if (target == data.index) {
+				target_arr_index = index
+			} else if (target < data.index) {
+				data.index -= 1
+			}
+		})
+		if (target_arr_index < 0) return
+		const removed_content_data = new_activeContentDataList[target_arr_index]
+		console.log(removed_content_data)
+		setMinimizedContentDataList(minimizedContentDataList.concat([removed_content_data]))
+		new_activeContentDataList.splice(target_arr_index, 1)
+		setActiveContentDataList(new_activeContentDataList)
 	}
 
 	const addContentData = (ulr_or_id_list: string[]): boolean => {
@@ -97,14 +115,14 @@ const App = () => {
 					new_stream_data.src = `https://www.youtube.com/embed/${new_stream_data.stream_id}?autoplay=1`
 					new_chat_data.src = `https://www.youtube.com/live_chat?v=${new_stream_data.stream_id}&embed_domain=localhost`
 					new_stream_data.thumbnail_url = `https://i.ytimg.com/vi/${new_stream_data.stream_id}/maxresdefault_live.jpg`
-					new_chat_data.thumbnail_url = '/youtube_chat_icon.png'
+					new_chat_data.thumbnail_url = '/nimado/youtube_chat_icon.png'
 					break
 				}
 				case 'twitch': {
 					new_stream_data.src = `https://player.twitch.tv/?muted=true&channel=${new_stream_data.stream_id}&parent=localhost`
 					new_chat_data.src = `https://twitch.tv/embed/${new_stream_data.stream_id}/chat?parent=localhost`
 					new_stream_data.thumbnail_url = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${new_stream_data.stream_id}.jpg`
-					new_chat_data.thumbnail_url = '/twitch_chat_icon.png'
+					new_chat_data.thumbnail_url = '/nimado/twitch_chat_icon.png'
 					break
 				}
 				default: {
@@ -130,6 +148,7 @@ const App = () => {
 						index={data.index}
 						upIndex={() => upIndex(data.index)}
 						downIndex={() => downIndex(data.index)}
+						minimizeContent={() => minimizeContent(data.index)}
 					/>
 				)
 			})
@@ -146,6 +165,7 @@ const App = () => {
 						index={data.index}
 						upIndex={() => upIndex(data.index)}
 						downIndex={() => downIndex(data.index)}
+						minimizeContent={() => minimizeContent(data.index)}
 					/>
 				)
 			})
@@ -154,6 +174,32 @@ const App = () => {
 	const containers = useMemo(() => {
 		return stream_containers.concat(chat_containers)
 	}, [stream_containers, chat_containers])
+
+	const minimized_containers = useMemo(() => {
+		return minimizedContentDataList.map((data: ContentData) => {
+			return (
+				<div
+					onClick={() => {
+						const new_data = JSON.parse(JSON.stringify(data))
+						new_data.index = activeContentDataList.length
+						setActiveContentDataList(activeContentDataList.concat(new_data))
+
+						setMinimizedContentDataList(
+							minimizedContentDataList.filter(
+								(d: ContentData) => d.stream_id != data.stream_id || d.is_chat != data.is_chat
+							)
+						)
+					}}
+				>
+					<p>
+						{data.stream_id}
+						{data.is_chat ? '(chat)' : '(stream)'}
+					</p>
+					<img src={data.thumbnail_url} />
+				</div>
+			)
+		})
+	}, [minimizedContentDataList])
 
 	useEffect(() => {
 		addContentData(['https://www.twitch.tv/rlgus1006'])
@@ -199,6 +245,9 @@ const App = () => {
 				</svg>
 			</div>
 			{containers}
+			<div className='absolute bottom-0 left-0 flex flex-row w-full h-[20%]'>
+				{minimized_containers}
+			</div>
 		</div>
 	)
 }
