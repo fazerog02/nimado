@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { StreamerData } from '../types'
+import { ContentData } from '../types'
 import FlexibleIframe from './FlexibleIframe'
 
 interface Props {
-	streamer_data: StreamerData
+	streamer_data: ContentData
 	index: number
 	upIndex: Function
 	downIndex: Function
@@ -24,7 +24,7 @@ const ChatContainer = (props: Props) => {
 			style={Object.assign(
 				{
 					width: '20%',
-					height: '100%',
+					height: '95%',
 				},
 				props.style ? props.style : {}
 			)}

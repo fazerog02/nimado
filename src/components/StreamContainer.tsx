@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { StreamerData } from '../types'
+import { ContentData } from '../types'
 import FlexibleIframe from './FlexibleIframe'
 
 interface Props {
-	streamer_data: StreamerData
+	streamer_data: ContentData
 	index: number
 	upIndex: Function
 	downIndex: Function

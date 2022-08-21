@@ -1,52 +1,70 @@
 import { useEffect, useMemo, useState } from 'react'
+import ChatContainer from './components/ChatContainer'
 import StreamContainer from './components/StreamContainer'
-import { StreamerData } from './types'
+import { ContentData } from './types'
 
 const App = () => {
 	const [addPopup, setAddPopup] = useState<boolean>(false)
-	const [activeStreamerDataList, setActiveStreamerDataList] = useState<StreamerData[]>([
+	const [activeStreamerDataList, setActiveStreamerDataList] = useState<ContentData[]>([
 		{
 			is_twitch: true,
+			is_chat: false,
 			id: 'rlgus1006',
 			thumbnail_url: '',
 			index: 0,
 		},
 		{
 			is_twitch: true,
-			id: 'syaruru3',
+			is_chat: true,
+			id: 'rlgus1006',
 			thumbnail_url: '',
 			index: 1,
+		},
+		{
+			is_twitch: true,
+			is_chat: false,
+			id: 'syaruru3',
+			thumbnail_url: '',
+			index: 2,
 		},
 	])
 
 	const stream_containers = useMemo(() => {
-		return activeStreamerDataList.map<JSX.Element>((data: StreamerData) => {
-			return (
-				<StreamContainer
-					key={data.id}
-					streamer_data={data}
-					index={data.index}
-					upIndex={() => upIndex(data.index)}
-					downIndex={() => downIndex(data.index)}
-				/>
-			)
-		})
+		return activeStreamerDataList
+			.filter((data: ContentData) => !data.is_chat)
+			.map<JSX.Element>((data: ContentData) => {
+				return (
+					<StreamContainer
+						key={data.id}
+						streamer_data={data}
+						index={data.index}
+						upIndex={() => upIndex(data.index)}
+						downIndex={() => downIndex(data.index)}
+					/>
+				)
+			})
 	}, [activeStreamerDataList])
 
 	const chat_containers = useMemo(() => {
-		return activeStreamerDataList.map<JSX.Element>((data: StreamerData) => {
-			return (
-				<StreamContainer
-					key={data.id}
-					streamer_data={data}
-					index={data.index}
-					upIndex={() => upIndex(data.index)}
-					downIndex={() => downIndex(data.index)}
-				/>
-			)
-		})
+		return activeStreamerDataList
+			.filter((data: ContentData) => data.is_chat)
+			.map<JSX.Element>((data: ContentData) => {
+				return (
+					<ChatContainer
+						key={data.id}
+						streamer_data={data}
+						index={data.index}
+						upIndex={() => upIndex(data.index)}
+						downIndex={() => downIndex(data.index)}
+					/>
+				)
+			})
 	}, [activeStreamerDataList])
 
+	const containers = useMemo(() => {
+		return stream_containers.concat(chat_containers)
+	}, [stream_containers, chat_containers])
+	stream_containers
 	const upIndex = (target: number) => {
 		console.log(target, 'up')
 		if (target >= activeStreamerDataList.length - 1 || target < 0) return
@@ -99,7 +117,7 @@ const App = () => {
 				</svg>
 			</div>
 
-			{stream_containers}
+			{containers}
 		</div>
 	)
 }
