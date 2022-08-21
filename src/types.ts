@@ -1,7 +1,8 @@
 export interface ContentData {
-	is_twitch: boolean
+	service: string
 	is_chat: boolean
-	id: string
+	stream_id: string
+	src: string
 	thumbnail_url: string
 	index: number
 }

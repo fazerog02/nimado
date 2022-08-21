@@ -3,7 +3,7 @@ import { ContentData } from '../types'
 import FlexibleIframe from './FlexibleIframe'
 
 interface Props {
-	streamer_data: ContentData
+	content_data: ContentData
 	index: number
 	upIndex: Function
 	downIndex: Function
@@ -20,7 +20,7 @@ const ChatContainer = (props: Props) => {
 
 	return (
 		<FlexibleIframe
-			src={`https://twitch.tv/embed/${props.streamer_data.id}/chat?parent=localhost&parent=localhost`}
+			src={props.content_data.src}
 			style={Object.assign(
 				{
 					width: '20%',
