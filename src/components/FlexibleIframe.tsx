@@ -107,6 +107,7 @@ const FlexibleIframe = (props: Props) => {
 					allowFullScreen
 					className={`absolute top-[30px] left-0 w-full`}
 					style={{ height: 'calc(100% - 30px)' }}
+					allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
 				></iframe>
 			</div>
 			<Moveable

@@ -1,12 +1,47 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, ChangeEvent } from 'react'
 import ChatContainer from './components/ChatContainer'
 import Popup from './components/Popup'
 import StreamContainer from './components/StreamContainer'
 import { ContentData } from './types'
 
+interface AddContentFormData {
+	url_or_id: string
+}
+
 const App = () => {
 	const [addPopup, setAddPopup] = useState<boolean>(false)
+	const [addContentFormData, setAddContentFormData] = useState<AddContentFormData>({
+		url_or_id: '',
+	})
 	const [activeContentDataList, setActiveContentDataList] = useState<ContentData[]>([])
+
+	const upIndex = (target: number) => {
+		console.log(target, 'up')
+		if (target >= activeContentDataList.length - 1 || target < 0) return
+		let new_streamerDataList = activeContentDataList.slice()
+		const target_indexes = [-1, -1]
+		for (let i = 0; i < new_streamerDataList.length; i++) {
+			if (new_streamerDataList[i].index == target) target_indexes[0] = i
+			if (new_streamerDataList[i].index == target + 1) target_indexes[1] = i
+		}
+		new_streamerDataList[target_indexes[0]].index = target + 1
+		new_streamerDataList[target_indexes[1]].index = target
+		setActiveContentDataList(new_streamerDataList)
+	}
+
+	const downIndex = (target: number) => {
+		console.log(target, 'down')
+		if (target < 1 || target >= activeContentDataList.length) return
+		let new_streamerDataList = activeContentDataList.slice()
+		const target_indexes = [-1, -1]
+		for (let i = 0; i < new_streamerDataList.length; i++) {
+			if (new_streamerDataList[i].index == target - 1) target_indexes[0] = i
+			if (new_streamerDataList[i].index == target) target_indexes[1] = i
+		}
+		new_streamerDataList[target_indexes[0]].index = target
+		new_streamerDataList[target_indexes[1]].index = target - 1
+		setActiveContentDataList(new_streamerDataList)
+	}
 
 	const addContentData = (ulr_or_id_list: string[]): boolean => {
 		let new_contents: ContentData[] = []
@@ -59,15 +94,15 @@ const App = () => {
 			new_chat_data.index += 1
 			switch (new_stream_data.service) {
 				case 'youtube': {
-					new_stream_data.src = `https://www.youtube.com/embed/${new_stream_data.stream_id}`
-					new_chat_data.src = `https://www.youtube.com/live_chat?is_popout=1&v=${new_stream_data.stream_id}`
+					new_stream_data.src = `https://www.youtube.com/embed/${new_stream_data.stream_id}?autoplay=1`
+					new_chat_data.src = `https://www.youtube.com/live_chat?v=${new_stream_data.stream_id}&embed_domain=localhost`
 					new_stream_data.thumbnail_url = `https://i.ytimg.com/vi/${new_stream_data.stream_id}/maxresdefault_live.jpg`
 					new_chat_data.thumbnail_url = '/youtube_chat_icon.png'
 					break
 				}
 				case 'twitch': {
 					new_stream_data.src = `https://player.twitch.tv/?muted=true&channel=${new_stream_data.stream_id}&parent=localhost`
-					new_chat_data.src = `https://twitch.tv/embed/${new_stream_data.stream_id}/chat&parent=localhost`
+					new_chat_data.src = `https://twitch.tv/embed/${new_stream_data.stream_id}/chat?parent=localhost`
 					new_stream_data.thumbnail_url = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${new_stream_data.stream_id}.jpg`
 					new_chat_data.thumbnail_url = '/twitch_chat_icon.png'
 					break
@@ -119,43 +154,35 @@ const App = () => {
 	const containers = useMemo(() => {
 		return stream_containers.concat(chat_containers)
 	}, [stream_containers, chat_containers])
-	stream_containers
-	const upIndex = (target: number) => {
-		console.log(target, 'up')
-		if (target >= activeContentDataList.length - 1 || target < 0) return
-		let new_streamerDataList = activeContentDataList.slice()
-		const target_indexes = [-1, -1]
-		for (let i = 0; i < new_streamerDataList.length; i++) {
-			if (new_streamerDataList[i].index == target) target_indexes[0] = i
-			if (new_streamerDataList[i].index == target + 1) target_indexes[1] = i
-		}
-		new_streamerDataList[target_indexes[0]].index = target + 1
-		new_streamerDataList[target_indexes[1]].index = target
-		setActiveContentDataList(new_streamerDataList)
-	}
-
-	const downIndex = (target: number) => {
-		console.log(target, 'down')
-		if (target < 1 || target >= activeContentDataList.length) return
-		let new_streamerDataList = activeContentDataList.slice()
-		const target_indexes = [-1, -1]
-		for (let i = 0; i < new_streamerDataList.length; i++) {
-			if (new_streamerDataList[i].index == target - 1) target_indexes[0] = i
-			if (new_streamerDataList[i].index == target) target_indexes[1] = i
-		}
-		new_streamerDataList[target_indexes[0]].index = target
-		new_streamerDataList[target_indexes[1]].index = target - 1
-		setActiveContentDataList(new_streamerDataList)
-	}
 
 	useEffect(() => {
-		addContentData(['t:rlgus1006', 't:syaruru3'])
+		addContentData(['https://www.twitch.tv/rlgus1006'])
 	}, [])
 
 	return (
 		<div className='w-screen h-screen bg-dark'>
-			container
-			<Popup is_open={addPopup} closePopup={() => setAddPopup(false)}></Popup>
+			<Popup is_open={addPopup} closePopup={() => setAddPopup(false)}>
+				<div>
+					<div>配信の追加</div>
+					<input
+						value={addContentFormData.url_or_id}
+						onChange={(e: ChangeEvent<HTMLInputElement>) =>
+							setAddContentFormData({
+								...addContentFormData,
+								url_or_id: e.target.value,
+							})
+						}
+					></input>
+					<button
+						onClick={() => {
+							addContentData([addContentFormData.url_or_id])
+							setAddContentFormData({ ...addContentFormData, url_or_id: '' })
+						}}
+					>
+						追加
+					</button>
+				</div>
+			</Popup>
 			<div
 				onClick={() => setAddPopup(true)}
 				className='absolute z-[10000] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center'

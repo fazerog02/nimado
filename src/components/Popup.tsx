@@ -9,12 +9,17 @@ interface Props {
 const Popup = (props: Props) => {
 	return (
 		<div
-			className={`absolute inset-0 z-[100000] bg-black/50 flex items-center justify-center ${
+			className={`w-screen h-screen flex items-center justify-center ${
 				props.is_open ? '' : 'hidden'
 			}`}
-			onClick={() => props.closePopup()}
 		>
-			<div className='w-fit h-fit p-7'></div>
+			<div
+				className='absolute inset-0 w-full h-full z-[100000] bg-black/50'
+				onClick={() => props.closePopup()}
+			></div>
+			<div className='relative w-fit h-fit p-7 rounded-lg bg-white z-[100001]'>
+				{props.children}
+			</div>
 		</div>
 	)
 }
