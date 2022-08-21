@@ -15,6 +15,7 @@ interface Props {
 
 const FlexibleIframe = (props: Props) => {
 	const [translate, setTranslate] = useState<Array<number>>([0, 0])
+	const [moving, setMoving] = useState<boolean>(false)
 
 	const targetRef = useRef<HTMLDivElement>(null)
 
@@ -26,14 +27,26 @@ const FlexibleIframe = (props: Props) => {
 		<>
 			<div
 				ref={targetRef}
-				style={Object.assign({ zIndex: 1000 + props.index * 10 }, props.style ? props.style : {})}
+				style={Object.assign(
+					{ zIndex: moving ? 10001 : 1000 + props.index * 10 },
+					props.style ? props.style : {}
+				)}
 				className={`absolute ${props.className ? props.className : ''}`}
+				onMouseDown={() => {
+					if (props.editable) setMoving(true)
+				}}
+				onMouseUp={() => {
+					setMoving(false)
+				}}
 			>
 				<div className='absolute inset-0 w-full h-[30px] bg-light_dark text-white'>
-					<div className='w-fit h-full ml-auto px-3 flex items-center'>
+					<div
+						className='relative w-fit h-full ml-auto px-3 flex items-center gap-3'
+						style={moving ? { zIndex: 10003 } : {}}
+					>
 						<svg
 							xmlns='http://www.w3.org/2000/svg'
-							className='h-6 w-6'
+							className='h-full p-1'
 							fill='none'
 							viewBox='0 0 24 24'
 							stroke='currentColor'
@@ -44,7 +57,7 @@ const FlexibleIframe = (props: Props) => {
 						</svg>
 						<svg
 							xmlns='http://www.w3.org/2000/svg'
-							className='h-6 w-6'
+							className='h-full p-1'
 							fill='none'
 							viewBox='0 0 24 24'
 							stroke='currentColor'
@@ -56,7 +69,7 @@ const FlexibleIframe = (props: Props) => {
 						{props.editable ? (
 							<svg
 								xmlns='http://www.w3.org/2000/svg'
-								className='h-5 w-5'
+								className='h-full p-1'
 								viewBox='0 0 20 20'
 								fill='currentColor'
 								onClick={() => props.changeEditable()}
@@ -66,7 +79,7 @@ const FlexibleIframe = (props: Props) => {
 						) : (
 							<svg
 								xmlns='http://www.w3.org/2000/svg'
-								className='h-5 w-5'
+								className='h-full p-1'
 								viewBox='0 0 20 20'
 								fill='currentColor'
 								onClick={() => props.changeEditable()}
@@ -84,9 +97,10 @@ const FlexibleIframe = (props: Props) => {
 					className={`absolute top-[30px] left-0 w-full`}
 					style={{
 						height: 'calc(100% - 30px)',
-						zIndex: props.editable ? 1001 + props.index * 10 : 0,
+						zIndex: props.editable ? (moving ? 10002 : 1001 + props.index * 10) : 0,
 					}}
 				></div>
+				<div className={`absolute inset-0 w-screen h-screen ${moving ? '' : 'hidden'}`}></div>
 				<iframe
 					src={props.src}
 					frameBorder={0}

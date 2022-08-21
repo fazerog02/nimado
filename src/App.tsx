@@ -1,44 +1,79 @@
-import { useMemo, useState } from 'react'
-import { JsxElement } from 'typescript'
+import { useEffect, useMemo, useState } from 'react'
 import StreamContainer from './components/StreamContainer'
+import { StreamerData } from './types'
 
 const App = () => {
 	const [addPopup, setAddPopup] = useState<boolean>(false)
-	const [streamIds, setStreamIds] = useState<string[]>(['rlgus1006', 'syaruru3'])
+	const [activeStreamerDataList, setActiveStreamerDataList] = useState<StreamerData[]>([
+		{
+			is_twitch: true,
+			id: 'rlgus1006',
+			thumbnail_url: '',
+			index: 0,
+		},
+		{
+			is_twitch: true,
+			id: 'syaruru3',
+			thumbnail_url: '',
+			index: 1,
+		},
+	])
+
+	const stream_containers = useMemo(() => {
+		return activeStreamerDataList.map<JSX.Element>((data: StreamerData) => {
+			return (
+				<StreamContainer
+					key={data.id}
+					streamer_data={data}
+					index={data.index}
+					upIndex={() => upIndex(data.index)}
+					downIndex={() => downIndex(data.index)}
+				/>
+			)
+		})
+	}, [activeStreamerDataList])
+
+	const chat_containers = useMemo(() => {
+		return activeStreamerDataList.map<JSX.Element>((data: StreamerData) => {
+			return (
+				<StreamContainer
+					key={data.id}
+					streamer_data={data}
+					index={data.index}
+					upIndex={() => upIndex(data.index)}
+					downIndex={() => downIndex(data.index)}
+				/>
+			)
+		})
+	}, [activeStreamerDataList])
 
 	const upIndex = (target: number) => {
 		console.log(target, 'up')
-		if (target >= streamIds.length - 1 || target < 0) return
-		let new_streamIds = streamIds.slice()
-		const tmp = new_streamIds[target]
-		new_streamIds[target] = new_streamIds[target + 1]
-		new_streamIds[target + 1] = tmp
-		setStreamIds(new_streamIds)
+		if (target >= activeStreamerDataList.length - 1 || target < 0) return
+		let new_streamerDataList = activeStreamerDataList.slice()
+		const target_indexes = [-1, -1]
+		for (let i = 0; i < new_streamerDataList.length; i++) {
+			if (new_streamerDataList[i].index == target) target_indexes[0] = i
+			if (new_streamerDataList[i].index == target + 1) target_indexes[1] = i
+		}
+		new_streamerDataList[target_indexes[0]].index = target + 1
+		new_streamerDataList[target_indexes[1]].index = target
+		setActiveStreamerDataList(new_streamerDataList)
 	}
 
 	const downIndex = (target: number) => {
 		console.log(target, 'down')
-		if (target < 1 || target >= streamIds.length) return
-		let new_streamIds = streamIds.slice()
-		const tmp = new_streamIds[target]
-		new_streamIds[target] = new_streamIds[target - 1]
-		new_streamIds[target - 1] = tmp
-		setStreamIds(new_streamIds)
+		if (target < 1 || target >= activeStreamerDataList.length) return
+		let new_streamerDataList = activeStreamerDataList.slice()
+		const target_indexes = [-1, -1]
+		for (let i = 0; i < new_streamerDataList.length; i++) {
+			if (new_streamerDataList[i].index == target - 1) target_indexes[0] = i
+			if (new_streamerDataList[i].index == target) target_indexes[1] = i
+		}
+		new_streamerDataList[target_indexes[0]].index = target
+		new_streamerDataList[target_indexes[1]].index = target - 1
+		setActiveStreamerDataList(new_streamerDataList)
 	}
-
-	const stream_containers = useMemo(() => {
-		return streamIds.map<JSX.Element>((stream_id: string, index: number): JSX.Element => {
-			return (
-				<StreamContainer
-					key={index}
-					stream_id={stream_id}
-					index={index}
-					upIndex={() => upIndex(index)}
-					downIndex={() => downIndex(index)}
-				/>
-			)
-		})
-	}, [streamIds])
 
 	return (
 		<div className='w-screen h-screen bg-dark'>

@@ -11,7 +11,7 @@ interface Props {
 	style?: React.CSSProperties
 }
 
-const StreamContainer = (props: Props) => {
+const ChatContainer = (props: Props) => {
 	const [editable, setEditable] = useState<boolean>(true)
 
 	const getOptimumHeight = (width: number): number => {
@@ -20,18 +20,18 @@ const StreamContainer = (props: Props) => {
 
 	return (
 		<FlexibleIframe
-			src={`https://player.twitch.tv/?muted=true&channel=${props.streamer_data.id}&parent=localhost&parent=localhost`}
+			src={`https://twitch.tv/embed/${props.streamer_data.id}/chat?parent=localhost&parent=localhost`}
 			style={Object.assign(
 				{
-					width: document.body.clientWidth / 2,
-					height: getOptimumHeight(document.body.clientWidth / 2),
+					width: '20%',
+					height: '100%',
 				},
 				props.style ? props.style : {}
 			)}
 			className={props.className ? props.className : ''}
 			editable={editable}
 			changeEditable={() => setEditable(!editable)}
-			keepRatio
+			keepRatio={false}
 			index={props.index}
 			upIndex={() => props.upIndex()}
 			downIndex={() => props.downIndex()}
@@ -39,4 +39,4 @@ const StreamContainer = (props: Props) => {
 	)
 }
 
-export default StreamContainer
+export default ChatContainer
