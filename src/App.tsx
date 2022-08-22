@@ -9,7 +9,10 @@ interface AddContentFormData {
 }
 
 const App = () => {
+	const [bottomMenu, setBottomMenu] = useState<boolean>(false)
 	const [addPopup, setAddPopup] = useState<boolean>(false)
+	const [minimizedContentFolder, setMinimizedContentFolder] = useState<boolean>(false)
+
 	const [addContentFormData, setAddContentFormData] = useState<AddContentFormData>({
 		url_or_id: '',
 	})
@@ -207,6 +210,77 @@ const App = () => {
 
 	return (
 		<div className='w-screen h-screen bg-dark'>
+			<div
+				onClick={() => setBottomMenu(!bottomMenu)}
+				className='absolute z-[10000] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center'
+			>
+				{bottomMenu ? (
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						className='h-8 w-8'
+						fill='none'
+						viewBox='0 0 24 24'
+						stroke='currentColor'
+						strokeWidth={3}
+					>
+						<path strokeLinecap='round' strokeLinejoin='round' d='M9 5l7 7-7 7' />
+					</svg>
+				) : (
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						className='h-8 w-8'
+						fill='none'
+						viewBox='0 0 24 24'
+						stroke='currentColor'
+						strokeWidth={2}
+					>
+						<path strokeLinecap='round' strokeLinejoin='round' d='M4 6h16M4 12h16M4 18h16' />
+					</svg>
+				)}
+			</div>
+			<div
+				onClick={() => setAddPopup(true)}
+				className='absolute z-[9999] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center transition-[right] duration-300'
+				style={bottomMenu ? { right: 'calc(2rem + 64px)' } : {}}
+			>
+				<svg
+					xmlns='http://www.w3.org/2000/svg'
+					className='h-8 w-8'
+					fill='none'
+					viewBox='0 0 24 24'
+					stroke='currentColor'
+					strokeWidth={2}
+				>
+					<path strokeLinecap='round' strokeLinejoin='round' d='M12 4v16m8-8H4' />
+				</svg>
+			</div>
+			<div
+				onClick={() => setMinimizedContentFolder(true)}
+				className='absolute z-[9999] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center transition-[right] duration-300'
+				style={bottomMenu ? { right: 'calc(3rem + 128px)' } : {}}
+			>
+				<svg
+					xmlns='http://www.w3.org/2000/svg'
+					className='h-8 w-8'
+					fill='none'
+					viewBox='0 0 24 24'
+					stroke='currentColor'
+					strokeWidth={2}
+				>
+					<path
+						strokeLinecap='round'
+						strokeLinejoin='round'
+						d='M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z'
+					/>
+				</svg>
+			</div>
+
+			{containers}
+
+			<div className='absolute bottom-0 left-0 flex flex-row w-full h-[20%]'>
+				{minimized_containers}
+			</div>
+
 			<Popup is_open={addPopup} closePopup={() => setAddPopup(false)}>
 				<div>
 					<div>配信の追加</div>
@@ -229,25 +303,6 @@ const App = () => {
 					</button>
 				</div>
 			</Popup>
-			<div
-				onClick={() => setAddPopup(true)}
-				className='absolute z-[10000] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center'
-			>
-				<svg
-					xmlns='http://www.w3.org/2000/svg'
-					className='h-8 w-8'
-					fill='none'
-					viewBox='0 0 24 24'
-					stroke='currentColor'
-					strokeWidth={3}
-				>
-					<path strokeLinecap='round' strokeLinejoin='round' d='M12 4v16m8-8H4' />
-				</svg>
-			</div>
-			{containers}
-			<div className='absolute bottom-0 left-0 flex flex-row w-full h-[20%]'>
-				{minimized_containers}
-			</div>
 		</div>
 	)
 }
