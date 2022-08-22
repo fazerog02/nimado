@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, ChangeEvent } from 'react'
 import ChatContainer from './components/ChatContainer'
+import MinimizedContainer from './components/MinimizedContainer'
 import Popup from './components/Popup'
 import StreamContainer from './components/StreamContainer'
 import { ContentData } from './types'
@@ -18,6 +19,8 @@ const App = () => {
 	})
 	const [activeContentDataList, setActiveContentDataList] = useState<ContentData[]>([])
 	const [minimizedContentDataList, setMinimizedContentDataList] = useState<ContentData[]>([])
+
+	const [minimizedContentFolderIndex, setMinimizedContentFolderIndex] = useState<number>(0)
 
 	const upIndex = (target: number) => {
 		if (target >= activeContentDataList.length - 1 || target < 0) return
@@ -75,6 +78,25 @@ const App = () => {
 	}
 
 	const addContentData = (ulr_or_id_list: string[]): boolean => {
+		ulr_or_id_list = Array.from(new Set(ulr_or_id_list)) // 重複削除
+
+		let stream_id_list_stream: string[] = []
+		let stream_id_list_chat: string[] = []
+		activeContentDataList.forEach((data: ContentData) => {
+			if (data.is_chat) {
+				stream_id_list_chat.push(data.stream_id)
+			} else {
+				stream_id_list_stream.push(data.stream_id)
+			}
+		})
+		minimizedContentDataList.forEach((data: ContentData) => {
+			if (data.is_chat) {
+				stream_id_list_chat.push(data.stream_id)
+			} else {
+				stream_id_list_stream.push(data.stream_id)
+			}
+		})
+
 		let new_contents: ContentData[] = []
 		ulr_or_id_list.forEach((ulr_or_id: string, for_index: number) => {
 			const new_stream_data: ContentData = {
@@ -143,7 +165,9 @@ const App = () => {
 				}
 			}
 
-			new_contents = new_contents.concat([new_stream_data, new_chat_data])
+			if (!stream_id_list_stream.includes(new_stream_data.stream_id))
+				new_contents.push(new_stream_data)
+			if (!stream_id_list_chat.includes(new_stream_data.stream_id)) new_contents.push(new_chat_data)
 		})
 
 		setActiveContentDataList(activeContentDataList.concat(new_contents))
@@ -189,21 +213,21 @@ const App = () => {
 	}, [stream_containers, chat_containers])
 
 	const minimized_containers = useMemo(() => {
-		return minimizedContentDataList.map((data: ContentData, index: number) => {
-			return (
-				<div
-					className='h-full text-center text-white'
-					onClick={() => returnMinimizedContent(index)}
-				>
-					<img className='h-[90%] mx-auto' src={data.thumbnail_url} />
-					<p className='h-[10%]'>
-						{data.stream_id}
-						{data.is_chat ? '(chat)' : '(stream)'}
-					</p>
-				</div>
+		const new_minimized_containers: JSX.Element[] = []
+		let index: number
+		for (let i = 0; i < 4; i++) {
+			index = 4 * minimizedContentFolderIndex + i
+			if (index >= minimizedContentDataList.length) break
+			new_minimized_containers.push(
+				<MinimizedContainer
+					data={minimizedContentDataList[index]}
+					returnMinimizedContent={() => returnMinimizedContent(index)}
+					deleteMinimizedContent={() => 1 + 1}
+				/>
 			)
-		})
-	}, [minimizedContentDataList])
+		}
+		return new_minimized_containers
+	}, [minimizedContentDataList, minimizedContentFolderIndex])
 
 	useEffect(() => {
 		addContentData(['https://www.twitch.tv/rlgus1006'])
@@ -302,12 +326,48 @@ const App = () => {
 			</Popup>
 
 			<div
-				className={`absolute bottom-0 left-0 z-[9990]  w-full h-[40%] p-4 ${
+				className={`absolute bottom-0 left-0 z-[9990] flex flex-row gap-0 w-full h-[40%] p-4 ${
 					minimizedContentFolder ? '' : 'hidden'
 				}`}
 			>
-				<div className='grid grid-cols-4 grid-rows-1 gap-5 w-full h-full bg-heavy_gray rounded-lg py-6 px-4'>
+				<div
+					className='w-[5%] h-full flex items-center justify-center text-gray'
+					onClick={() => {
+						if (minimizedContentFolderIndex <= 0) return
+						setMinimizedContentFolderIndex(minimizedContentFolderIndex - 1)
+					}}
+				>
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						className='h-10 w-10'
+						fill='none'
+						viewBox='0 0 24 24'
+						stroke='currentColor'
+						strokeWidth={2}
+					>
+						<path strokeLinecap='round' strokeLinejoin='round' d='M15 19l-7-7 7-7' />
+					</svg>
+				</div>
+				<div className='grid grid-cols-4 grid-rows-1 gap-5 w-[90%] h-full bg-heavy_gray rounded-lg py-6 px-4'>
 					{minimized_containers}
+				</div>
+				<div
+					className='w-[5%] h-full flex items-center justify-center text-gray'
+					onClick={() => {
+						if ((minimizedContentFolderIndex + 1) * 4 >= minimizedContentDataList.length) return
+						setMinimizedContentFolderIndex(minimizedContentFolderIndex + 1)
+					}}
+				>
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						className='h-10 w-10'
+						fill='none'
+						viewBox='0 0 24 24'
+						stroke='currentColor'
+						strokeWidth={2}
+					>
+						<path strokeLinecap='round' strokeLinejoin='round' d='M9 5l7 7-7 7' />
+					</svg>
 				</div>
 			</div>
 		</div>

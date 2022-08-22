@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/nimado/static/css/main.37ab0a40.css",
-    "main.js": "/nimado/static/js/main.a6f8151f.js",
+    "main.css": "/nimado/static/css/main.899da325.css",
+    "main.js": "/nimado/static/js/main.4748c423.js",
     "static/js/787.df778892.chunk.js": "/nimado/static/js/787.df778892.chunk.js",
     "index.html": "/nimado/index.html",
-    "main.37ab0a40.css.map": "/nimado/static/css/main.37ab0a40.css.map",
-    "main.a6f8151f.js.map": "/nimado/static/js/main.a6f8151f.js.map",
+    "main.899da325.css.map": "/nimado/static/css/main.899da325.css.map",
+    "main.4748c423.js.map": "/nimado/static/js/main.4748c423.js.map",
     "787.df778892.chunk.js.map": "/nimado/static/js/787.df778892.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.37ab0a40.css",
-    "static/js/main.a6f8151f.js"
+    "static/css/main.899da325.css",
+    "static/js/main.4748c423.js"
   ]
 }

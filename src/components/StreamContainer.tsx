@@ -26,6 +26,8 @@ const StreamContainer = (props: Props) => {
 				{
 					width: document.body.clientWidth / 2,
 					height: getOptimumHeight(document.body.clientWidth / 2),
+					top: '500px',
+					left: '100px',
 				},
 				props.style ? props.style : {}
 			)}
