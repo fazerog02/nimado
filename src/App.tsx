@@ -64,6 +64,16 @@ const App = () => {
 		setActiveContentDataList(new_activeContentDataList)
 	}
 
+	const returnMinimizedContent = (index: number) => {
+		const new_data = JSON.parse(JSON.stringify(minimizedContentDataList[index]))
+		new_data.index = activeContentDataList.length
+		setActiveContentDataList(activeContentDataList.concat(new_data))
+
+		const new_minimizedContentDataList = minimizedContentDataList.slice()
+		new_minimizedContentDataList.splice(index, 1)
+		setMinimizedContentDataList(new_minimizedContentDataList)
+	}
+
 	const addContentData = (ulr_or_id_list: string[]): boolean => {
 		let new_contents: ContentData[] = []
 		ulr_or_id_list.forEach((ulr_or_id: string, for_index: number) => {
@@ -179,26 +189,17 @@ const App = () => {
 	}, [stream_containers, chat_containers])
 
 	const minimized_containers = useMemo(() => {
-		return minimizedContentDataList.map((data: ContentData) => {
+		return minimizedContentDataList.map((data: ContentData, index: number) => {
 			return (
 				<div
-					onClick={() => {
-						const new_data = JSON.parse(JSON.stringify(data))
-						new_data.index = activeContentDataList.length
-						setActiveContentDataList(activeContentDataList.concat(new_data))
-
-						setMinimizedContentDataList(
-							minimizedContentDataList.filter(
-								(d: ContentData) => d.stream_id != data.stream_id || d.is_chat != data.is_chat
-							)
-						)
-					}}
+					className='h-full text-center text-white'
+					onClick={() => returnMinimizedContent(index)}
 				>
-					<p>
+					<img className='h-[90%] mx-auto' src={data.thumbnail_url} />
+					<p className='h-[10%]'>
 						{data.stream_id}
 						{data.is_chat ? '(chat)' : '(stream)'}
 					</p>
-					<img src={data.thumbnail_url} />
 				</div>
 			)
 		})
@@ -255,7 +256,7 @@ const App = () => {
 				</svg>
 			</div>
 			<div
-				onClick={() => setMinimizedContentFolder(true)}
+				onClick={() => setMinimizedContentFolder(!minimizedContentFolder)}
 				className='absolute z-[9999] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center transition-[right] duration-300'
 				style={bottomMenu ? { right: 'calc(3rem + 128px)' } : {}}
 			>
@@ -276,10 +277,6 @@ const App = () => {
 			</div>
 
 			{containers}
-
-			<div className='absolute bottom-0 left-0 flex flex-row w-full h-[20%]'>
-				{minimized_containers}
-			</div>
 
 			<Popup is_open={addPopup} closePopup={() => setAddPopup(false)}>
 				<div>
@@ -303,6 +300,16 @@ const App = () => {
 					</button>
 				</div>
 			</Popup>
+
+			<div
+				className={`absolute bottom-0 left-0 z-[9990]  w-full h-[40%] p-4 ${
+					minimizedContentFolder ? '' : 'hidden'
+				}`}
+			>
+				<div className='grid grid-cols-4 grid-rows-1 gap-5 w-full h-full bg-heavy_gray rounded-lg py-6 px-4'>
+					{minimized_containers}
+				</div>
+			</div>
 		</div>
 	)
 }

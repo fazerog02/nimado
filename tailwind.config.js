@@ -9,6 +9,7 @@ module.exports = {
 			twitch_purple: '#5c16c5',
 			dark: '#0E0E10',
 			light_dark: '#18181B',
+			heavy_gray: '#3b3b42',
 		},
 	},
 	plugins: [],

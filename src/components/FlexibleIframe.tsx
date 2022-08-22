@@ -127,7 +127,9 @@ const FlexibleIframe = (props: Props) => {
 				origin={false}
 				draggable={props.editable}
 				resizable={props.editable}
-				renderDirections={['nw', 'ne', 'sw', 'se']}
+				renderDirections={
+					props.keepRatio ? ['nw', 'ne', 'sw', 'se'] : ['nw', 'ne', 'sw', 'se', 'n', 'e', 'w', 's']
+				}
 				hideDefaultLines={!props.editable}
 				onDragStart={(e: OnDragStart) => {
 					e.set(translate)
