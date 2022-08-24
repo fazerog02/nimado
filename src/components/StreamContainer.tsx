@@ -8,6 +8,7 @@ interface Props {
 	upIndex: Function
 	downIndex: Function
 	minimizeContent: Function
+	gridMode: boolean
 	className?: string
 	style?: React.CSSProperties
 }
@@ -26,8 +27,6 @@ const StreamContainer = (props: Props) => {
 				{
 					width: document.body.clientWidth / 2,
 					height: getOptimumHeight(document.body.clientWidth / 2),
-					top: '500px',
-					left: '100px',
 				},
 				props.style ? props.style : {}
 			)}
@@ -39,6 +38,7 @@ const StreamContainer = (props: Props) => {
 			upIndex={() => props.upIndex()}
 			downIndex={() => props.downIndex()}
 			minimizeContent={() => props.minimizeContent()}
+			gridMode={props.gridMode}
 		/>
 	)
 }

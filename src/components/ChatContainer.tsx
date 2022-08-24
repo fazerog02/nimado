@@ -8,6 +8,7 @@ interface Props {
 	upIndex: Function
 	downIndex: Function
 	minimizeContent: Function
+	gridMode: boolean
 	className?: string
 	style?: React.CSSProperties
 }
@@ -15,20 +16,10 @@ interface Props {
 const ChatContainer = (props: Props) => {
 	const [editable, setEditable] = useState<boolean>(true)
 
-	const getOptimumHeight = (width: number): number => {
-		return (width / 16) * 9 + 30
-	}
-
 	return (
 		<FlexibleIframe
 			src={props.content_data.src}
-			style={Object.assign(
-				{
-					width: '20%',
-					height: '95%',
-				},
-				props.style ? props.style : {}
-			)}
+			style={props.style ? props.style : {}}
 			className={props.className ? props.className : ''}
 			editable={editable}
 			changeEditable={() => setEditable(!editable)}
@@ -37,6 +28,7 @@ const ChatContainer = (props: Props) => {
 			upIndex={() => props.upIndex()}
 			downIndex={() => props.downIndex()}
 			minimizeContent={() => props.minimizeContent()}
+			gridMode={props.gridMode}
 		/>
 	)
 }

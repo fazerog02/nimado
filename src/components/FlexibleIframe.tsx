@@ -10,6 +10,7 @@ interface Props {
 	upIndex: Function
 	downIndex: Function
 	minimizeContent: Function
+	gridMode: boolean
 	className?: string
 	style?: React.CSSProperties
 }
@@ -23,6 +24,10 @@ const FlexibleIframe = (props: Props) => {
 	const getOptimumHeight = (width: number): number => {
 		return (width / 16) * 9 + 30
 	}
+
+	// const moveable = new Moveable(document.body, {
+
+	// })
 
 	return (
 		<>
@@ -78,7 +83,7 @@ const FlexibleIframe = (props: Props) => {
 						>
 							<path strokeLinecap='round' strokeLinejoin='round' d='M19 9l-7 7-7-7' />
 						</svg>
-						{props.editable ? (
+						{props.gridMode || props.editable ? (
 							<svg
 								xmlns='http://www.w3.org/2000/svg'
 								className='h-full p-1'
@@ -125,12 +130,12 @@ const FlexibleIframe = (props: Props) => {
 			<Moveable
 				target={targetRef}
 				origin={false}
-				draggable={props.editable}
-				resizable={props.editable}
+				draggable={!props.gridMode && props.editable}
+				resizable={!props.gridMode && props.editable}
 				renderDirections={
 					props.keepRatio ? ['nw', 'ne', 'sw', 'se'] : ['nw', 'ne', 'sw', 'se', 'n', 'e', 'w', 's']
 				}
-				hideDefaultLines={!props.editable}
+				hideDefaultLines={props.gridMode || !props.editable}
 				onDragStart={(e: OnDragStart) => {
 					e.set(translate)
 				}}

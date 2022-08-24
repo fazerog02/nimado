@@ -13,6 +13,7 @@ const App = () => {
 	const [bottomMenu, setBottomMenu] = useState<boolean>(false)
 	const [addPopup, setAddPopup] = useState<boolean>(false)
 	const [minimizedContentFolder, setMinimizedContentFolder] = useState<boolean>(false)
+	const [gridMode, setGridMode] = useState<boolean>(true)
 
 	const [addContentFormData, setAddContentFormData] = useState<AddContentFormData>({
 		url_or_id: '',
@@ -186,27 +187,46 @@ const App = () => {
 						upIndex={() => upIndex(data.index)}
 						downIndex={() => downIndex(data.index)}
 						minimizeContent={() => minimizeContent(data.index)}
+						gridMode={gridMode}
 					/>
 				)
 			})
-	}, [activeContentDataList])
+	}, [activeContentDataList, gridMode])
 
 	const chat_containers = useMemo(() => {
-		return activeContentDataList
-			.filter((data: ContentData) => data.is_chat)
-			.map<JSX.Element>((data: ContentData) => {
-				return (
-					<ChatContainer
-						key={`c_${data.stream_id}`}
-						content_data={data}
-						index={data.index}
-						upIndex={() => upIndex(data.index)}
-						downIndex={() => downIndex(data.index)}
-						minimizeContent={() => minimizeContent(data.index)}
-					/>
-				)
-			})
-	}, [activeContentDataList])
+		const active_chat_content_data_list = activeContentDataList.filter(
+			(data: ContentData) => data.is_chat
+		)
+		return active_chat_content_data_list.map<JSX.Element>((data: ContentData, index: number) => {
+			let chat_grid_cols: number = 1
+			let chat_grid_rows: number = 1
+			const c_len = active_chat_content_data_list.length
+			while (c_len > chat_grid_rows * chat_grid_cols) {
+				if (chat_grid_cols < chat_grid_rows) chat_grid_cols += 1
+				else chat_grid_rows += 1
+			}
+			console.log({ len: c_len, row: chat_grid_rows, col: chat_grid_cols })
+
+			return (
+				<ChatContainer
+					key={`c_${data.stream_id}`}
+					content_data={data}
+					index={data.index}
+					upIndex={() => upIndex(data.index)}
+					downIndex={() => downIndex(data.index)}
+					minimizeContent={() => minimizeContent(data.index)}
+					gridMode={gridMode}
+					style={{
+						height: `${100 / chat_grid_rows}%`,
+						width: `${30 / chat_grid_cols}%`,
+						right: `${(30 / chat_grid_cols) * Math.floor(index / chat_grid_rows)}%`,
+						top: `${(100 / chat_grid_rows) * (index % chat_grid_rows)}%`,
+						transform: 'none',
+					}}
+				/>
+			)
+		})
+	}, [activeContentDataList, gridMode])
 
 	const containers = useMemo(() => {
 		return stream_containers.concat(chat_containers)
@@ -284,22 +304,68 @@ const App = () => {
 				className='absolute z-[9999] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center transition-[right] duration-300'
 				style={bottomMenu ? { right: 'calc(3rem + 128px)' } : {}}
 			>
-				<svg
-					xmlns='http://www.w3.org/2000/svg'
-					className='h-8 w-8'
-					fill='none'
-					viewBox='0 0 24 24'
-					stroke='currentColor'
-					strokeWidth={2}
-				>
-					<path
-						strokeLinecap='round'
-						strokeLinejoin='round'
-						d='M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z'
-					/>
-				</svg>
+				{minimizedContentFolder ? (
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						className='h-8 w-8'
+						viewBox='0 0 20 20'
+						fill='currentColor'
+					>
+						<path
+							fillRule='evenodd'
+							d='M2 6a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1H8a3 3 0 00-3 3v1.5a1.5 1.5 0 01-3 0V6z'
+							clipRule='evenodd'
+						/>
+						<path d='M6 12a2 2 0 012-2h8a2 2 0 012 2v2a2 2 0 01-2 2H2h2a2 2 0 002-2v-2z' />
+					</svg>
+				) : (
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						className='h-8 w-8'
+						fill='none'
+						viewBox='0 0 24 24'
+						stroke='currentColor'
+						strokeWidth={2}
+					>
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							d='M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z'
+						/>
+					</svg>
+				)}
 			</div>
-
+			<div
+				onClick={() => setGridMode(!gridMode)}
+				className='absolute z-[9999] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center transition-[right] duration-300'
+				style={bottomMenu ? { right: 'calc(4rem + 192px)' } : {}}
+			>
+				{gridMode ? (
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						className='h-8 w-8'
+						viewBox='0 0 20 20'
+						fill='currentColor'
+					>
+						<path d='M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' />
+					</svg>
+				) : (
+					<svg
+						xmlns='http://www.w3.org/2000/svg'
+						className='h-8 w-8'
+						fill='none'
+						viewBox='0 0 24 24'
+						stroke='currentColor'
+						strokeWidth={2}
+					>
+						<path
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							d='M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'
+						/>
+					</svg>
+				)}
+			</div>
 			{containers}
 
 			<Popup is_open={addPopup} closePopup={() => setAddPopup(false)}>
