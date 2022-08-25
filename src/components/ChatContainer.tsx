@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ContentData } from '../types'
+import { ContentData, Position, Size } from '../types'
 import FlexibleIframe from './FlexibleIframe'
 
 interface Props {
@@ -18,6 +18,10 @@ const ChatContainer = (props: Props) => {
 
 	return (
 		<FlexibleIframe
+			position={props.content_data.position}
+			setPosition={(position: Position) => props.content_data.setPosition(position)}
+			size={props.content_data.size}
+			setSize={(size: Size) => props.content_data.setSize(size)}
 			src={props.content_data.src}
 			style={props.style ? props.style : {}}
 			className={props.className ? props.className : ''}

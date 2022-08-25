@@ -1,12 +1,19 @@
-import { useEffect, useMemo, useState, ChangeEvent } from 'react'
+import { useEffect, useMemo, useState, ChangeEvent, useRef } from 'react'
 import ChatContainer from './components/ChatContainer'
 import MinimizedContainer from './components/MinimizedContainer'
 import Popup from './components/Popup'
 import StreamContainer from './components/StreamContainer'
-import { ContentData } from './types'
+import { ContentData, Position, Size } from './types'
 
 interface AddContentFormData {
 	url_or_id: string
+}
+
+interface PositionAndSize {
+	height: string | number
+	width: string | number
+	x: number
+	y: number
 }
 
 const App = () => {
@@ -14,12 +21,18 @@ const App = () => {
 	const [addPopup, setAddPopup] = useState<boolean>(false)
 	const [minimizedContentFolder, setMinimizedContentFolder] = useState<boolean>(false)
 	const [gridMode, setGridMode] = useState<boolean>(true)
+	const gridModeRef = useRef<boolean | null>(null)
+	gridModeRef.current = gridMode
 
 	const [addContentFormData, setAddContentFormData] = useState<AddContentFormData>({
 		url_or_id: '',
 	})
 	const [activeContentDataList, setActiveContentDataList] = useState<ContentData[]>([])
+	const activeContentDataListRef = useRef<ContentData[] | null>(null)
+	activeContentDataListRef.current = activeContentDataList
 	const [minimizedContentDataList, setMinimizedContentDataList] = useState<ContentData[]>([])
+	const minimizedContentDataListRef = useRef<ContentData[] | null>(null)
+	minimizedContentDataListRef.current = minimizedContentDataList
 
 	const [minimizedContentFolderIndex, setMinimizedContentFolderIndex] = useState<number>(0)
 
@@ -62,20 +75,177 @@ const App = () => {
 		})
 		if (target_arr_index < 0) return
 		const removed_content_data = new_activeContentDataList[target_arr_index]
-		console.log(removed_content_data)
 		setMinimizedContentDataList(minimizedContentDataList.concat([removed_content_data]))
 		new_activeContentDataList.splice(target_arr_index, 1)
-		setActiveContentDataList(new_activeContentDataList)
+		setActiveContentDataList(
+			gridMode ? updateGrid(new_activeContentDataList) : new_activeContentDataList
+		)
 	}
 
 	const returnMinimizedContent = (index: number) => {
-		const new_data = JSON.parse(JSON.stringify(minimizedContentDataList[index]))
-		new_data.index = activeContentDataList.length
-		setActiveContentDataList(activeContentDataList.concat(new_data))
+		const new_data = JSON.parse(JSON.stringify(minimizedContentDataListRef.current![index]))
+		new_data.index = activeContentDataListRef.current!.length
+		const new_activeContentDataList = activeContentDataListRef.current!.slice().concat(new_data)
+		setActiveContentDataList(
+			gridModeRef.current! ? updateGrid(new_activeContentDataList) : new_activeContentDataList
+		)
 
-		const new_minimizedContentDataList = minimizedContentDataList.slice()
+		const new_minimizedContentDataList = minimizedContentDataListRef.current!.slice()
 		new_minimizedContentDataList.splice(index, 1)
 		setMinimizedContentDataList(new_minimizedContentDataList)
+	}
+
+	const percent2pixel = (percent: number[]) => {
+		// [x, y]
+		return [(window.innerWidth * percent[0]) / 100, (window.innerHeight * percent[1]) / 100]
+	}
+
+	const getDefaultChatPositionAndSize = (
+		is_new: boolean = true,
+		index?: number,
+		data_len?: number
+	): PositionAndSize => {
+		let c_len: number = 0
+		let c_index: number = 0
+		if (is_new) {
+			const active_chat_content_data_list = activeContentDataListRef.current!.filter(
+				(data: ContentData) => data.is_chat
+			)
+			c_len = active_chat_content_data_list.length + 1
+			c_index = active_chat_content_data_list.length
+		} else {
+			c_len = data_len!
+			c_index = index!
+		}
+
+		let chat_grid_cols: number = 1
+		let chat_grid_rows: number = 1
+		while (c_len > chat_grid_rows * chat_grid_cols) {
+			if (chat_grid_cols < chat_grid_rows) chat_grid_cols += 1
+			else chat_grid_rows += 1
+		}
+
+		const width = 30 / chat_grid_cols
+		const height = 100 / chat_grid_rows
+
+		const x_percent = 100 - width - width * Math.floor(c_index / chat_grid_rows)
+		const y_percent = height * (c_index % chat_grid_rows)
+		const position_pixel = percent2pixel([x_percent, y_percent])
+
+		return {
+			height: `${height}%`,
+			width: `${width}%`,
+			x: position_pixel[0],
+			y: position_pixel[1],
+		}
+	}
+
+	const getDefaultStreamPositionAndSize = (
+		is_new: boolean = true,
+		index?: number,
+		data_len?: number
+	): PositionAndSize => {
+		let s_len: number = 0
+		let s_index: number = 0
+		if (is_new) {
+			const active_chat_content_data_list = activeContentDataListRef.current!.filter(
+				(data: ContentData) => !data.is_chat
+			)
+			s_len = active_chat_content_data_list.length + 1
+			s_index = active_chat_content_data_list.length
+		} else {
+			s_len = data_len!
+			s_index = index!
+		}
+
+		let stream_grid_cols: number = 1
+		let stream_grid_rows: number = 1
+		if (s_len == 2) {
+			stream_grid_cols = 2
+			stream_grid_rows = 1
+		} else {
+			while (s_len > stream_grid_rows * stream_grid_cols) {
+				if (stream_grid_cols < stream_grid_rows) stream_grid_cols += 1
+				else stream_grid_rows += 1
+			}
+		}
+
+		const width = 70 / stream_grid_cols
+
+		const size_pixel = percent2pixel([width, 0])
+		size_pixel[1] = (size_pixel[0] / 16) * 9 + 30
+
+		const is_height_over = size_pixel[1] * stream_grid_rows > window.innerHeight
+		if (is_height_over) {
+			size_pixel[1] = window.innerHeight / stream_grid_rows
+			size_pixel[0] = ((size_pixel[1] - 30) / 9) * 16
+		}
+
+		const position_pixel = [
+			size_pixel[0] * Math.floor(s_index / stream_grid_rows),
+			size_pixel[1] * (s_index % stream_grid_rows) +
+				(window.innerHeight - size_pixel[1] * stream_grid_rows) / 2,
+		]
+		if (is_height_over) {
+			position_pixel[0] += (percent2pixel([70, 0])[0] - size_pixel[0] * stream_grid_cols) / 2
+			position_pixel[1] = size_pixel[1] * (s_index % stream_grid_rows)
+		}
+
+		return {
+			height: size_pixel[1],
+			width: size_pixel[0],
+			x: position_pixel[0],
+			y: position_pixel[1],
+		}
+	}
+
+	const setContentSize = (index: number, size: Size) => {
+		const new_activeContentDataList = activeContentDataListRef.current!.slice()
+		new_activeContentDataList.forEach((data: ContentData) => {
+			if (data.index == index) {
+				data.size.width = size.width
+				data.size.height = size.height
+			}
+		})
+		setActiveContentDataList(new_activeContentDataList)
+	}
+
+	const setContentPosition = (index: number, position: Position) => {
+		const new_activeContentDataList = activeContentDataListRef.current!.slice()
+		new_activeContentDataList.forEach((data: ContentData) => {
+			if (data.index == index) {
+				data.position.x = position.x
+				data.position.y = position.y
+			}
+		})
+		setActiveContentDataList(new_activeContentDataList)
+	}
+
+	const updateGrid = (data_list: ContentData[]): ContentData[] => {
+		const new_data_list = data_list.slice()
+
+		let c_len = 0
+		let s_len = 0
+		new_data_list.forEach((data: ContentData) => {
+			if (data.is_chat) c_len++
+			else s_len++
+		})
+
+		let c_index = 0
+		let s_index = 0
+		let position_and_size: PositionAndSize
+		new_data_list.forEach((data: ContentData) => {
+			if (data.is_chat) {
+				position_and_size = getDefaultChatPositionAndSize(false, c_index, c_len)
+				c_index++
+			} else {
+				position_and_size = getDefaultStreamPositionAndSize(false, s_index, s_len)
+				s_index++
+			}
+			data.position = { x: position_and_size.x, y: position_and_size.y }
+			data.size = { width: position_and_size.width, height: position_and_size.height }
+		})
+		return new_data_list
 	}
 
 	const addContentData = (ulr_or_id_list: string[]): boolean => {
@@ -99,15 +269,24 @@ const App = () => {
 		})
 
 		let new_contents: ContentData[] = []
+		const data_list_len = activeContentDataList.length
 		ulr_or_id_list.forEach((ulr_or_id: string, for_index: number) => {
+			const stream_position_and_size = getDefaultStreamPositionAndSize(true)
 			const new_stream_data: ContentData = {
+				position: { x: stream_position_and_size.x, y: stream_position_and_size.y },
+				setPosition: () => {},
+				size: { width: stream_position_and_size.width, height: stream_position_and_size.height },
+				setSize: () => {},
 				service: '',
 				is_chat: false,
 				stream_id: '',
 				src: '',
 				thumbnail_url: '',
-				index: activeContentDataList.length + for_index * 2,
+				index: data_list_len + for_index * 2,
 			}
+			new_stream_data.setSize = (size: Size) => setContentSize(new_stream_data.index, size)
+			new_stream_data.setPosition = (position: Position) =>
+				setContentPosition(new_stream_data.index, position)
 
 			if (ulr_or_id.includes('youtube.com')) {
 				const raw_params = ulr_or_id.split('?')[1]
@@ -146,6 +325,16 @@ const App = () => {
 			const new_chat_data: ContentData = JSON.parse(JSON.stringify(new_stream_data))
 			new_chat_data.is_chat = true
 			new_chat_data.index += 1
+			const chat_position_and_size = getDefaultChatPositionAndSize(true)
+			new_chat_data.position = { x: chat_position_and_size.x, y: chat_position_and_size.y }
+			new_chat_data.size = {
+				width: chat_position_and_size.width,
+				height: chat_position_and_size.height,
+			}
+			new_chat_data.setSize = (size: Size) => setContentSize(new_chat_data.index, size)
+			new_chat_data.setPosition = (position: Position) =>
+				setContentPosition(new_chat_data.index, position)
+
 			switch (new_stream_data.service) {
 				case 'youtube': {
 					new_stream_data.src = `https://www.youtube.com/embed/${new_stream_data.stream_id}?autoplay=1`
@@ -171,7 +360,14 @@ const App = () => {
 			if (!stream_id_list_chat.includes(new_stream_data.stream_id)) new_contents.push(new_chat_data)
 		})
 
-		setActiveContentDataList(activeContentDataList.concat(new_contents))
+		let new_activeContentDataList = activeContentDataList.slice()
+		new_activeContentDataList = new_activeContentDataList.concat(new_contents)
+
+		if (gridMode) {
+			new_activeContentDataList = updateGrid(new_activeContentDataList)
+		}
+
+		setActiveContentDataList(new_activeContentDataList)
 		return true
 	}
 
@@ -197,16 +393,7 @@ const App = () => {
 		const active_chat_content_data_list = activeContentDataList.filter(
 			(data: ContentData) => data.is_chat
 		)
-		return active_chat_content_data_list.map<JSX.Element>((data: ContentData, index: number) => {
-			let chat_grid_cols: number = 1
-			let chat_grid_rows: number = 1
-			const c_len = active_chat_content_data_list.length
-			while (c_len > chat_grid_rows * chat_grid_cols) {
-				if (chat_grid_cols < chat_grid_rows) chat_grid_cols += 1
-				else chat_grid_rows += 1
-			}
-			console.log({ len: c_len, row: chat_grid_rows, col: chat_grid_cols })
-
+		return active_chat_content_data_list.map<JSX.Element>((data: ContentData) => {
 			return (
 				<ChatContainer
 					key={`c_${data.stream_id}`}
@@ -216,13 +403,6 @@ const App = () => {
 					downIndex={() => downIndex(data.index)}
 					minimizeContent={() => minimizeContent(data.index)}
 					gridMode={gridMode}
-					style={{
-						height: `${100 / chat_grid_rows}%`,
-						width: `${30 / chat_grid_cols}%`,
-						right: `${(30 / chat_grid_cols) * Math.floor(index / chat_grid_rows)}%`,
-						top: `${(100 / chat_grid_rows) * (index % chat_grid_rows)}%`,
-						transform: 'none',
-					}}
 				/>
 			)
 		})
@@ -234,9 +414,8 @@ const App = () => {
 
 	const minimized_containers = useMemo(() => {
 		const new_minimized_containers: JSX.Element[] = []
-		let index: number
 		for (let i = 0; i < 4; i++) {
-			index = 4 * minimizedContentFolderIndex + i
+			let index = 4 * minimizedContentFolderIndex + i
 			if (index >= minimizedContentDataList.length) break
 			new_minimized_containers.push(
 				<MinimizedContainer
@@ -250,6 +429,10 @@ const App = () => {
 	}, [minimizedContentDataList, minimizedContentFolderIndex])
 
 	useEffect(() => {
+		window.addEventListener('resize', () => {
+			if (gridModeRef.current)
+				setActiveContentDataList(updateGrid(activeContentDataListRef.current!))
+		})
 		addContentData(['https://www.twitch.tv/rlgus1006'])
 	}, [])
 
@@ -336,7 +519,10 @@ const App = () => {
 				)}
 			</div>
 			<div
-				onClick={() => setGridMode(!gridMode)}
+				onClick={() => {
+					if (!gridMode) setActiveContentDataList(updateGrid(activeContentDataListRef.current!))
+					setGridMode(!gridMode)
+				}}
 				className='absolute z-[9999] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center transition-[right] duration-300'
 				style={bottomMenu ? { right: 'calc(4rem + 192px)' } : {}}
 			>
