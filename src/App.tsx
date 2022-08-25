@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, ChangeEvent, useRef } from 'react'
+
 import ChatContainer from './components/ChatContainer'
 import MinimizedContainer from './components/MinimizedContainer'
 import Popup from './components/Popup'
@@ -41,8 +42,8 @@ const App = () => {
 		let new_streamerDataList = activeContentDataList.slice()
 		const target_indexes = [-1, -1]
 		for (let i = 0; i < new_streamerDataList.length; i++) {
-			if (new_streamerDataList[i].index == target) target_indexes[0] = i
-			if (new_streamerDataList[i].index == target + 1) target_indexes[1] = i
+			if (new_streamerDataList[i].index === target) target_indexes[0] = i
+			if (new_streamerDataList[i].index === target + 1) target_indexes[1] = i
 		}
 		new_streamerDataList[target_indexes[0]].index = target + 1
 		new_streamerDataList[target_indexes[1]].index = target
@@ -54,8 +55,8 @@ const App = () => {
 		let new_streamerDataList = activeContentDataList.slice()
 		const target_indexes = [-1, -1]
 		for (let i = 0; i < new_streamerDataList.length; i++) {
-			if (new_streamerDataList[i].index == target - 1) target_indexes[0] = i
-			if (new_streamerDataList[i].index == target) target_indexes[1] = i
+			if (new_streamerDataList[i].index === target - 1) target_indexes[0] = i
+			if (new_streamerDataList[i].index === target) target_indexes[1] = i
 		}
 		new_streamerDataList[target_indexes[0]].index = target
 		new_streamerDataList[target_indexes[1]].index = target - 1
@@ -67,7 +68,7 @@ const App = () => {
 		const new_activeContentDataList = activeContentDataList.slice()
 		let target_arr_index = -1
 		new_activeContentDataList.forEach((data: ContentData, index: number) => {
-			if (target == data.index) {
+			if (target === data.index) {
 				target_arr_index = index
 			} else if (target < data.index) {
 				data.index -= 1
@@ -90,6 +91,12 @@ const App = () => {
 			gridModeRef.current! ? updateGrid(new_activeContentDataList) : new_activeContentDataList
 		)
 
+		const new_minimizedContentDataList = minimizedContentDataListRef.current!.slice()
+		new_minimizedContentDataList.splice(index, 1)
+		setMinimizedContentDataList(new_minimizedContentDataList)
+	}
+
+	const deleteMinimizedContent = (index: number) => {
 		const new_minimizedContentDataList = minimizedContentDataListRef.current!.slice()
 		new_minimizedContentDataList.splice(index, 1)
 		setMinimizedContentDataList(new_minimizedContentDataList)
@@ -160,7 +167,7 @@ const App = () => {
 
 		let stream_grid_cols: number = 1
 		let stream_grid_rows: number = 1
-		if (s_len == 2) {
+		if (s_len === 2) {
 			stream_grid_cols = 2
 			stream_grid_rows = 1
 		} else {
@@ -202,7 +209,7 @@ const App = () => {
 	const setContentSize = (index: number, size: Size) => {
 		const new_activeContentDataList = activeContentDataListRef.current!.slice()
 		new_activeContentDataList.forEach((data: ContentData) => {
-			if (data.index == index) {
+			if (data.index === index) {
 				data.size.width = size.width
 				data.size.height = size.height
 			}
@@ -213,7 +220,7 @@ const App = () => {
 	const setContentPosition = (index: number, position: Position) => {
 		const new_activeContentDataList = activeContentDataListRef.current!.slice()
 		new_activeContentDataList.forEach((data: ContentData) => {
-			if (data.index == index) {
+			if (data.index === index) {
 				data.position.x = position.x
 				data.position.y = position.y
 			}
@@ -293,9 +300,9 @@ const App = () => {
 				const str_params = raw_params.split('&')
 				str_params.forEach((str_param: string) => {
 					const key_value = str_param.split('=')
-					if (key_value[0] == 'v') new_stream_data.stream_id = key_value[1]
+					if (key_value[0] === 'v') new_stream_data.stream_id = key_value[1]
 				})
-				if (new_stream_data.stream_id == '') return false
+				if (new_stream_data.stream_id === '') return false
 				new_stream_data.service = 'youtube'
 			} else if (ulr_or_id.includes('twitch.tv')) {
 				const paths = ulr_or_id.replace('https://', '').split('/')
@@ -304,7 +311,7 @@ const App = () => {
 				new_stream_data.stream_id = paths[1]
 			} else {
 				const prefix_and_id = ulr_or_id.split(':')
-				if (prefix_and_id.length != 2) return false
+				if (prefix_and_id.length !== 2) return false
 				switch (prefix_and_id[0]) {
 					case 'y': {
 						new_stream_data.service = 'youtube'
@@ -377,13 +384,13 @@ const App = () => {
 			.map<JSX.Element>((data: ContentData) => {
 				return (
 					<StreamContainer
-						key={`s_${data.stream_id}`}
 						content_data={data}
-						index={data.index}
-						upIndex={() => upIndex(data.index)}
 						downIndex={() => downIndex(data.index)}
-						minimizeContent={() => minimizeContent(data.index)}
 						gridMode={gridMode}
+						index={data.index}
+						key={`s_${data.stream_id}`}
+						minimizeContent={() => minimizeContent(data.index)}
+						upIndex={() => upIndex(data.index)}
 					/>
 				)
 			})
@@ -396,13 +403,13 @@ const App = () => {
 		return active_chat_content_data_list.map<JSX.Element>((data: ContentData) => {
 			return (
 				<ChatContainer
-					key={`c_${data.stream_id}`}
 					content_data={data}
-					index={data.index}
-					upIndex={() => upIndex(data.index)}
 					downIndex={() => downIndex(data.index)}
-					minimizeContent={() => minimizeContent(data.index)}
 					gridMode={gridMode}
+					index={data.index}
+					key={`c_${data.stream_id}`}
+					minimizeContent={() => minimizeContent(data.index)}
+					upIndex={() => upIndex(data.index)}
 				/>
 			)
 		})
@@ -420,8 +427,11 @@ const App = () => {
 			new_minimized_containers.push(
 				<MinimizedContainer
 					data={minimizedContentDataList[index]}
+					deleteMinimizedContent={() => deleteMinimizedContent(index)}
+					key={`${minimizedContentDataList[index].is_chat ? 'c' : 's'}_${
+						minimizedContentDataList[index].stream_id
+					}`}
 					returnMinimizedContent={() => returnMinimizedContent(index)}
-					deleteMinimizedContent={() => 1 + 1}
 				/>
 			)
 		}
@@ -437,134 +447,134 @@ const App = () => {
 	}, [])
 
 	return (
-		<div className='w-screen h-screen bg-dark'>
+		<div className='h-screen w-screen bg-dark'>
 			<div
+				className='absolute bottom-4 right-4 z-[10000] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-twitch_purple text-white'
 				onClick={() => setBottomMenu(!bottomMenu)}
-				className='absolute z-[10000] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center'
 			>
 				{bottomMenu ? (
 					<svg
-						xmlns='http://www.w3.org/2000/svg'
 						className='h-8 w-8'
 						fill='none'
-						viewBox='0 0 24 24'
 						stroke='currentColor'
 						strokeWidth={3}
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'
 					>
-						<path strokeLinecap='round' strokeLinejoin='round' d='M9 5l7 7-7 7' />
+						<path d='M9 5l7 7-7 7' strokeLinecap='round' strokeLinejoin='round' />
 					</svg>
 				) : (
 					<svg
-						xmlns='http://www.w3.org/2000/svg'
 						className='h-8 w-8'
 						fill='none'
-						viewBox='0 0 24 24'
 						stroke='currentColor'
 						strokeWidth={2}
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'
 					>
-						<path strokeLinecap='round' strokeLinejoin='round' d='M4 6h16M4 12h16M4 18h16' />
+						<path d='M4 6h16M4 12h16M4 18h16' strokeLinecap='round' strokeLinejoin='round' />
 					</svg>
 				)}
 			</div>
 			<div
+				className='absolute bottom-4 right-4 z-[9999] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-twitch_purple text-white transition-[right] duration-300'
 				onClick={() => setAddPopup(true)}
-				className='absolute z-[9999] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center transition-[right] duration-300'
 				style={bottomMenu ? { right: 'calc(2rem + 64px)' } : {}}
 			>
 				<svg
-					xmlns='http://www.w3.org/2000/svg'
 					className='h-8 w-8'
 					fill='none'
-					viewBox='0 0 24 24'
 					stroke='currentColor'
 					strokeWidth={2}
+					viewBox='0 0 24 24'
+					xmlns='http://www.w3.org/2000/svg'
 				>
-					<path strokeLinecap='round' strokeLinejoin='round' d='M12 4v16m8-8H4' />
+					<path d='M12 4v16m8-8H4' strokeLinecap='round' strokeLinejoin='round' />
 				</svg>
 			</div>
 			<div
+				className='absolute bottom-4 right-4 z-[9999] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-twitch_purple text-white transition-[right] duration-300'
 				onClick={() => setMinimizedContentFolder(!minimizedContentFolder)}
-				className='absolute z-[9999] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center transition-[right] duration-300'
 				style={bottomMenu ? { right: 'calc(3rem + 128px)' } : {}}
 			>
 				{minimizedContentFolder ? (
 					<svg
-						xmlns='http://www.w3.org/2000/svg'
 						className='h-8 w-8'
-						viewBox='0 0 20 20'
 						fill='currentColor'
+						viewBox='0 0 20 20'
+						xmlns='http://www.w3.org/2000/svg'
 					>
 						<path
-							fillRule='evenodd'
-							d='M2 6a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1H8a3 3 0 00-3 3v1.5a1.5 1.5 0 01-3 0V6z'
 							clipRule='evenodd'
+							d='M2 6a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1H8a3 3 0 00-3 3v1.5a1.5 1.5 0 01-3 0V6z'
+							fillRule='evenodd'
 						/>
 						<path d='M6 12a2 2 0 012-2h8a2 2 0 012 2v2a2 2 0 01-2 2H2h2a2 2 0 002-2v-2z' />
 					</svg>
 				) : (
 					<svg
-						xmlns='http://www.w3.org/2000/svg'
 						className='h-8 w-8'
 						fill='none'
-						viewBox='0 0 24 24'
 						stroke='currentColor'
 						strokeWidth={2}
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'
 					>
 						<path
+							d='M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z'
 							strokeLinecap='round'
 							strokeLinejoin='round'
-							d='M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z'
 						/>
 					</svg>
 				)}
 			</div>
 			<div
+				className='absolute bottom-4 right-4 z-[9999] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-twitch_purple text-white transition-[right] duration-300'
 				onClick={() => {
 					if (!gridMode) setActiveContentDataList(updateGrid(activeContentDataListRef.current!))
 					setGridMode(!gridMode)
 				}}
-				className='absolute z-[9999] rounded-full bottom-4 right-4 w-[64px] h-[64px] bg-twitch_purple text-white flex items-center justify-center transition-[right] duration-300'
 				style={bottomMenu ? { right: 'calc(4rem + 192px)' } : {}}
 			>
 				{gridMode ? (
 					<svg
-						xmlns='http://www.w3.org/2000/svg'
 						className='h-8 w-8'
-						viewBox='0 0 20 20'
 						fill='currentColor'
+						viewBox='0 0 20 20'
+						xmlns='http://www.w3.org/2000/svg'
 					>
 						<path d='M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' />
 					</svg>
 				) : (
 					<svg
-						xmlns='http://www.w3.org/2000/svg'
 						className='h-8 w-8'
 						fill='none'
-						viewBox='0 0 24 24'
 						stroke='currentColor'
 						strokeWidth={2}
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'
 					>
 						<path
+							d='M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'
 							strokeLinecap='round'
 							strokeLinejoin='round'
-							d='M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'
 						/>
 					</svg>
 				)}
 			</div>
 			{containers}
 
-			<Popup is_open={addPopup} closePopup={() => setAddPopup(false)}>
+			<Popup closePopup={() => setAddPopup(false)} is_open={addPopup}>
 				<div>
 					<div>配信の追加</div>
 					<input
-						value={addContentFormData.url_or_id}
 						onChange={(e: ChangeEvent<HTMLInputElement>) =>
 							setAddContentFormData({
 								...addContentFormData,
 								url_or_id: e.target.value,
 							})
 						}
+						value={addContentFormData.url_or_id}
 					></input>
 					<button
 						onClick={() => {
@@ -578,47 +588,47 @@ const App = () => {
 			</Popup>
 
 			<div
-				className={`absolute bottom-0 left-0 z-[9990] flex flex-row gap-0 w-full h-[40%] p-4 ${
+				className={`absolute bottom-0 left-0 z-[9990] flex h-[40%] w-full flex-row gap-0 p-4 ${
 					minimizedContentFolder ? '' : 'hidden'
 				}`}
 			>
 				<div
-					className='w-[5%] h-full flex items-center justify-center text-gray'
+					className='flex h-full w-[5%] items-center justify-center text-gray'
 					onClick={() => {
 						if (minimizedContentFolderIndex <= 0) return
 						setMinimizedContentFolderIndex(minimizedContentFolderIndex - 1)
 					}}
 				>
 					<svg
-						xmlns='http://www.w3.org/2000/svg'
 						className='h-10 w-10'
 						fill='none'
-						viewBox='0 0 24 24'
 						stroke='currentColor'
 						strokeWidth={2}
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'
 					>
-						<path strokeLinecap='round' strokeLinejoin='round' d='M15 19l-7-7 7-7' />
+						<path d='M15 19l-7-7 7-7' strokeLinecap='round' strokeLinejoin='round' />
 					</svg>
 				</div>
-				<div className='grid grid-cols-4 grid-rows-1 gap-5 w-[90%] h-full bg-heavy_gray rounded-lg py-6 px-4'>
+				<div className='grid h-full w-[90%] grid-cols-4 grid-rows-1 gap-5 rounded-lg bg-heavy_gray py-6 px-4'>
 					{minimized_containers}
 				</div>
 				<div
-					className='w-[5%] h-full flex items-center justify-center text-gray'
+					className='flex h-full w-[5%] items-center justify-center text-gray'
 					onClick={() => {
 						if ((minimizedContentFolderIndex + 1) * 4 >= minimizedContentDataList.length) return
 						setMinimizedContentFolderIndex(minimizedContentFolderIndex + 1)
 					}}
 				>
 					<svg
-						xmlns='http://www.w3.org/2000/svg'
 						className='h-10 w-10'
 						fill='none'
-						viewBox='0 0 24 24'
 						stroke='currentColor'
 						strokeWidth={2}
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'
 					>
-						<path strokeLinecap='round' strokeLinejoin='round' d='M9 5l7 7-7 7' />
+						<path d='M9 5l7 7-7 7' strokeLinecap='round' strokeLinejoin='round' />
 					</svg>
 				</div>
 			</div>

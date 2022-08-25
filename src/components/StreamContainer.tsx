@@ -1,5 +1,7 @@
 import { useState } from 'react'
+
 import { ContentData, Size, Position } from '../types'
+
 import FlexibleIframe from './FlexibleIframe'
 
 interface Props {
@@ -22,10 +24,18 @@ const StreamContainer = (props: Props) => {
 
 	return (
 		<FlexibleIframe
+			changeEditable={() => setEditable(!editable)}
+			className={props.className ? props.className : ''}
+			downIndex={() => props.downIndex()}
+			editable={editable}
+			gridMode={props.gridMode}
+			index={props.index}
+			keepRatio
+			minimizeContent={() => props.minimizeContent()}
 			position={props.content_data.position}
 			setPosition={(position: Position) => props.content_data.setPosition(position)}
-			size={props.content_data.size}
 			setSize={(size: Size) => props.content_data.setSize(size)}
+			size={props.content_data.size}
 			src={props.content_data.src}
 			style={Object.assign(
 				{
@@ -34,15 +44,7 @@ const StreamContainer = (props: Props) => {
 				},
 				props.style ? props.style : {}
 			)}
-			className={props.className ? props.className : ''}
-			editable={editable}
-			changeEditable={() => setEditable(!editable)}
-			keepRatio
-			index={props.index}
 			upIndex={() => props.upIndex()}
-			downIndex={() => props.downIndex()}
-			minimizeContent={() => props.minimizeContent()}
-			gridMode={props.gridMode}
 		/>
 	)
 }

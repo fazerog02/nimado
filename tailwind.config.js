@@ -11,6 +11,7 @@ module.exports = {
 			light_dark: '#18181B',
 			heavy_gray: '#3b3b42',
 			gray: '#666673',
+			light_red: '#f2352e',
 		},
 	},
 	plugins: [],

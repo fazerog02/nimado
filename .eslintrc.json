@@ -1,5 +1,5 @@
 {
-	"extends": ["prettier", "plugin:tailwindcss/recommended"],
+	"extends": ["prettier", "plugin:tailwindcss/recommended", "react-app", "react-app/jest"],
 	"plugins": ["import", "unused-imports"],
 	"rules": {
 		"react/jsx-sort-props": "warn",
