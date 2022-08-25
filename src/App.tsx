@@ -345,14 +345,14 @@ const App = () => {
 			switch (new_stream_data.service) {
 				case 'youtube': {
 					new_stream_data.src = `https://www.youtube.com/embed/${new_stream_data.stream_id}?autoplay=1`
-					new_chat_data.src = `https://www.youtube.com/live_chat?v=${new_stream_data.stream_id}&embed_domain=fazerog02.github.io/nimado/`
+					new_chat_data.src = `https://www.youtube.com/live_chat?v=${new_stream_data.stream_id}&embed_domain=fazerog02.github.io`
 					new_stream_data.thumbnail_url = `https://i.ytimg.com/vi/${new_stream_data.stream_id}/maxresdefault_live.jpg`
 					new_chat_data.thumbnail_url = '/nimado/youtube_chat_icon.png'
 					break
 				}
 				case 'twitch': {
-					new_stream_data.src = `https://player.twitch.tv/?muted=true&channel=${new_stream_data.stream_id}&parent=fazerog02.github.io/nimado/`
-					new_chat_data.src = `https://twitch.tv/embed/${new_stream_data.stream_id}/chat?parent=fazerog02.github.io/nimado/`
+					new_stream_data.src = `https://player.twitch.tv/?muted=true&channel=${new_stream_data.stream_id}&parent=fazerog02.github.io`
+					new_chat_data.src = `https://twitch.tv/embed/${new_stream_data.stream_id}/chat?parent=fazerog02.github.io`
 					new_stream_data.thumbnail_url = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${new_stream_data.stream_id}.jpg`
 					new_chat_data.thumbnail_url = '/nimado/twitch_chat_icon.png'
 					break
@@ -443,7 +443,6 @@ const App = () => {
 			if (gridModeRef.current)
 				setActiveContentDataList(updateGrid(activeContentDataListRef.current!))
 		})
-		addContentData(['https://www.twitch.tv/rlgus1006'])
 	}, [])
 
 	return (
