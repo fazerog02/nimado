@@ -64,7 +64,7 @@ const FlexibleIframe = (props: Props) => {
 		>
 			<div className='absolute inset-0 h-[30px] w-full bg-light_dark text-white'>
 				<div
-					className='relative ml-auto flex h-full w-fit items-center gap-3 px-3'
+					className='relative ml-auto flex h-full w-fit max-w-full items-center gap-3 px-3'
 					style={moving ? { zIndex: 10003 } : {}}
 				>
 					<svg

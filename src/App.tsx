@@ -116,6 +116,7 @@ const App = () => {
 		index?: number,
 		data_len?: number
 	): PositionAndSize => {
+		const MAX_WIDTH = 20
 		let c_len: number = 0
 		let c_index: number = 0
 		if (is_new) {
@@ -136,7 +137,7 @@ const App = () => {
 			else chat_grid_rows += 1
 		}
 
-		const width = 30 / chat_grid_cols
+		const width = MAX_WIDTH / chat_grid_cols
 		const height = 100 / chat_grid_rows
 
 		const x_percent = 100 - width - width * Math.floor(c_index / chat_grid_rows)
@@ -156,6 +157,7 @@ const App = () => {
 		index?: number,
 		data_len?: number
 	): PositionAndSize => {
+		const MAX_WIDTH = 80
 		let s_len: number = 0
 		let s_index: number = 0
 		if (is_new) {
@@ -181,7 +183,7 @@ const App = () => {
 			}
 		}
 
-		const width = 70 / stream_grid_cols
+		const width = MAX_WIDTH / stream_grid_cols
 
 		const size_pixel = percent2pixel([width, 0])
 		size_pixel[1] = (size_pixel[0] / 16) * 9 + 30
@@ -198,7 +200,7 @@ const App = () => {
 				(window.innerHeight - size_pixel[1] * stream_grid_rows) / 2,
 		]
 		if (is_height_over) {
-			position_pixel[0] += (percent2pixel([70, 0])[0] - size_pixel[0] * stream_grid_cols) / 2
+			position_pixel[0] += (percent2pixel([MAX_WIDTH, 0])[0] - size_pixel[0] * stream_grid_cols) / 2
 			position_pixel[1] = size_pixel[1] * (s_index % stream_grid_rows)
 		}
 
@@ -608,7 +610,7 @@ const App = () => {
 			</Popup>
 
 			<div
-				className={`absolute bottom-0 left-0 z-[9990] flex h-[40%] w-full flex-row gap-0 p-4 ${
+				className={`absolute bottom-0 left-0 z-[9990] flex h-[30%] w-full flex-row gap-0 p-4 ${
 					minimizedContentFolder ? '' : 'hidden'
 				}`}
 			>
