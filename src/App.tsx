@@ -84,8 +84,12 @@ const App = () => {
 	}
 
 	const returnMinimizedContent = (index: number) => {
-		const new_data = JSON.parse(JSON.stringify(minimizedContentDataListRef.current![index]))
+		const new_data: ContentData = JSON.parse(
+			JSON.stringify(minimizedContentDataListRef.current![index])
+		)
 		new_data.index = activeContentDataListRef.current!.length
+		new_data.setSize = (size: Size) => setContentSize(new_data.index, size)
+		new_data.setPosition = (position: Position) => setContentPosition(new_data.index, position)
 		const new_activeContentDataList = activeContentDataListRef.current!.slice().concat(new_data)
 		setActiveContentDataList(
 			gridModeRef.current! ? updateGrid(new_activeContentDataList) : new_activeContentDataList
