@@ -30,7 +30,7 @@ const FlexibleIframe = (props: Props) => {
 			className={`absolute ${props.className ? props.className : ''}`}
 			disableDragging={props.gridMode || !props.editable}
 			enableResizing={!props.gridMode && props.editable}
-			lockAspectRatio={props.keepRatio}
+			lockAspectRatio={props.keepRatio ? 16 / 9 : false}
 			lockAspectRatioExtraHeight={30}
 			onDragStart={() => {
 				if (props.editable) setMoving(true)
