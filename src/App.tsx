@@ -447,6 +447,15 @@ const App = () => {
 			if (gridModeRef.current)
 				setActiveContentDataList(updateGrid(activeContentDataListRef.current!))
 		})
+
+		const url_parser = new URL(window.location.href)
+		if (url_parser.searchParams.has('streams')) {
+			const streams_str = url_parser.searchParams.get('streams')
+			const streams = streams_str?.split(',')
+			if (!(streams === undefined || streams.length <= 0 || streams[0] === '')) {
+				addContentData(streams)
+			}
+		}
 	}, [])
 
 	return (
