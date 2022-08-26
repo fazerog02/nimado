@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, ChangeEvent, useRef } from 'react'
+import { useEffect, useMemo, useState, ChangeEvent, useRef, KeyboardEvent } from 'react'
 
 import ChatContainer from './components/ChatContainer'
 import MinimizedContainer from './components/MinimizedContainer'
@@ -563,19 +563,27 @@ const App = () => {
 			</div>
 			{containers}
 
-			<Popup closePopup={() => setAddPopup(false)} is_open={addPopup}>
-				<div>
-					<div>配信の追加</div>
+			<Popup closePopup={() => setAddPopup(false)} is_open={addPopup} title='配信の追加'>
+				<div className='w-[50vw]'>
 					<input
+						className='mb-6 block w-11/12 border-b border-light_gray p-2 focus:border-twitch_purple focus:outline-none'
 						onChange={(e: ChangeEvent<HTMLInputElement>) =>
 							setAddContentFormData({
 								...addContentFormData,
 								url_or_id: e.target.value,
 							})
 						}
+						onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+							if (e.key === 'Enter') {
+								addContentData([addContentFormData.url_or_id])
+								setAddContentFormData({ ...addContentFormData, url_or_id: '' })
+							}
+						}}
+						placeholder='配信URLまたは配信者ID(ex: t:ninja)'
 						value={addContentFormData.url_or_id}
 					></input>
 					<button
+						className='float-right rounded-lg bg-twitch_purple py-3 px-5 text-center text-lg text-white'
 						onClick={() => {
 							addContentData([addContentFormData.url_or_id])
 							setAddContentFormData({ ...addContentFormData, url_or_id: '' })
