@@ -1,7 +1,8 @@
 import { ResizeDirection } from 're-resizable'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DraggableData, ResizableDelta, Rnd } from 'react-rnd'
 
+import Twitch from '../twitch_embed_v1'
 import { Position, Size } from '../types'
 
 interface Props {
@@ -9,7 +10,8 @@ interface Props {
 	setPosition: Function
 	size: Size
 	setSize: Function
-	src: string
+	stream_id: string
+	is_chat: boolean
 	keepRatio: boolean
 	editable: boolean
 	changeEditable: Function
@@ -20,10 +22,45 @@ interface Props {
 	gridMode: boolean
 	className?: string
 	style?: React.CSSProperties
+	is_play: boolean
+	is_mute: boolean
 }
 
 const FlexibleIframe = (props: Props) => {
 	const [moving, setMoving] = useState<boolean>(false)
+	const [controller, setController] = useState<any>(null)
+
+	useEffect(() => {
+		if (!props.is_chat && controller === null) {
+			setController(
+				new Twitch.Player(`s_embed_${props.stream_id}`, {
+					width: '100%',
+					height: '100%',
+					channel: props.stream_id,
+					parent: ['localhost'],
+				})
+			)
+
+			return () => {
+				const embed_div = document.getElementById(`s_embed_${props.stream_id}`)
+				if (embed_div !== null && embed_div.lastChild !== null)
+					embed_div.removeChild(embed_div.lastChild)
+				setController(null)
+			}
+		}
+	}, [])
+
+	useEffect(() => {
+		if (controller !== null) {
+			props.is_play ? controller.play() : controller.pause()
+		}
+	}, [props.is_play])
+
+	useEffect(() => {
+		if (controller !== null) {
+			controller.setMuted(props.is_mute)
+		}
+	}, [props.is_mute])
 
 	return (
 		<Rnd
@@ -135,15 +172,21 @@ const FlexibleIframe = (props: Props) => {
 						!props.gridMode && props.editable ? (moving ? 10002 : 1001 + props.index * 10) : 0,
 				}}
 			></div>
-			<iframe
-				allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-				allowFullScreen
-				className={`absolute top-[30px] left-0 w-full`}
-				frameBorder={0}
-				src={props.src}
-				style={{ height: 'calc(100% - 30px)' }}
-				title={props.src}
-			></iframe>
+			{props.is_chat ? (
+				<iframe
+					className={`absolute top-[30px] left-0 w-full`}
+					frameBorder={0}
+					src={`https://www.twitch.tv/embed/${props.stream_id}/chat?parent=localhost`}
+					style={{ height: 'calc(100% - 30px)' }}
+					title={`${props.stream_id}'s chat`}
+				></iframe>
+			) : (
+				<div
+					className={`absolute top-[30px] left-0 w-full`}
+					id={`s_embed_${props.stream_id}`}
+					style={{ height: 'calc(100% - 30px)' }}
+				></div>
+			)}
 		</Rnd>
 	)
 }

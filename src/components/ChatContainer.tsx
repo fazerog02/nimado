@@ -13,6 +13,8 @@ interface Props {
 	gridMode: boolean
 	className?: string
 	style?: React.CSSProperties
+	is_play: boolean
+	is_mute: boolean
 }
 
 const ChatContainer = (props: Props) => {
@@ -26,13 +28,16 @@ const ChatContainer = (props: Props) => {
 			editable={editable}
 			gridMode={props.gridMode}
 			index={props.index}
+			is_chat={true}
+			is_mute={props.is_mute}
+			is_play={props.is_play}
 			keepRatio={false}
 			minimizeContent={() => props.minimizeContent()}
 			position={props.content_data.position}
 			setPosition={(position: Position) => props.content_data.setPosition(position)}
 			setSize={(size: Size) => props.content_data.setSize(size)}
 			size={props.content_data.size}
-			src={props.content_data.src}
+			stream_id={props.content_data.stream_id}
 			style={props.style ? props.style : {}}
 			upIndex={() => props.upIndex()}
 		/>

@@ -24,6 +24,8 @@ const App = () => {
 	const [gridMode, setGridMode] = useState<boolean>(true)
 	const gridModeRef = useRef<boolean | null>(null)
 	gridModeRef.current = gridMode
+	const [allMute, setAllMute] = useState<boolean>(false)
+	const [allPlay, setAllPlay] = useState<boolean>(true)
 
 	const [addContentFormData, setAddContentFormData] = useState<AddContentFormData>({
 		url_or_id: '',
@@ -36,6 +38,10 @@ const App = () => {
 	minimizedContentDataListRef.current = minimizedContentDataList
 
 	const [minimizedContentFolderIndex, setMinimizedContentFolderIndex] = useState<number>(0)
+
+	const switchAllMute = () => setAllMute(!allMute)
+
+	const switchAllPlay = () => setAllPlay(!allPlay)
 
 	const upIndex = (target: number) => {
 		if (target >= activeContentDataList.length - 1 || target < 0) return
@@ -261,6 +267,16 @@ const App = () => {
 		return new_data_list
 	}
 
+	const getStreamIdFromUrl = (url: string): string | null => {
+		try {
+			const parsed_url = new URL(url)
+			const stream_id = parsed_url.pathname.replaceAll('/', '')
+			return stream_id === '' ? null : stream_id
+		} catch {
+			return null
+		}
+	}
+
 	const addContentData = (ulr_or_id_list: string[]): boolean => {
 		ulr_or_id_list = Array.from(new Set(ulr_or_id_list)) // 重複削除
 
@@ -290,10 +306,9 @@ const App = () => {
 				setPosition: () => {},
 				size: { width: stream_position_and_size.width, height: stream_position_and_size.height },
 				setSize: () => {},
-				service: '',
+				service: 'twitch',
 				is_chat: false,
 				stream_id: '',
-				src: '',
 				thumbnail_url: '',
 				index: data_list_len + for_index * 2,
 			}
@@ -301,39 +316,8 @@ const App = () => {
 			new_stream_data.setPosition = (position: Position) =>
 				setContentPosition(new_stream_data.index, position)
 
-			if (ulr_or_id.includes('youtube.com')) {
-				const raw_params = ulr_or_id.split('?')[1]
-				const str_params = raw_params.split('&')
-				str_params.forEach((str_param: string) => {
-					const key_value = str_param.split('=')
-					if (key_value[0] === 'v') new_stream_data.stream_id = key_value[1]
-				})
-				if (new_stream_data.stream_id === '') return false
-				new_stream_data.service = 'youtube'
-			} else if (ulr_or_id.includes('twitch.tv')) {
-				const paths = ulr_or_id.replace('https://', '').split('/')
-				if (paths.length < 2) return false
-				new_stream_data.service = 'twitch'
-				new_stream_data.stream_id = paths[1]
-			} else {
-				const prefix_and_id = ulr_or_id.split(':')
-				if (prefix_and_id.length !== 2) return false
-				switch (prefix_and_id[0]) {
-					case 'y': {
-						new_stream_data.service = 'youtube'
-						new_stream_data.stream_id = prefix_and_id[1]
-						break
-					}
-					case 't': {
-						new_stream_data.service = 'twitch'
-						new_stream_data.stream_id = prefix_and_id[1]
-						break
-					}
-					default: {
-						return false
-					}
-				}
-			}
+			const stream_id: string | null = getStreamIdFromUrl(ulr_or_id)
+			new_stream_data.stream_id = stream_id === null ? ulr_or_id : stream_id
 
 			const new_chat_data: ContentData = JSON.parse(JSON.stringify(new_stream_data))
 			new_chat_data.is_chat = true
@@ -349,16 +333,14 @@ const App = () => {
 				setContentPosition(new_chat_data.index, position)
 
 			switch (new_stream_data.service) {
-				case 'youtube': {
-					new_stream_data.src = `https://www.youtube.com/embed/${new_stream_data.stream_id}?autoplay=1`
-					new_chat_data.src = `https://www.youtube.com/live_chat?v=${new_stream_data.stream_id}&embed_domain=fazerog02.github.io`
-					new_stream_data.thumbnail_url = `https://i.ytimg.com/vi/${new_stream_data.stream_id}/maxresdefault_live.jpg`
-					new_chat_data.thumbnail_url = '/nimado/youtube_chat_icon.png'
-					break
-				}
+				// case 'youtube': {
+				// 	new_stream_data.src = `https://www.youtube.com/embed/${new_stream_data.stream_id}?autoplay=1`
+				// 	new_chat_data.src = `https://www.youtube.com/live_chat?v=${new_stream_data.stream_id}&embed_domain=fazerog02.github.io`
+				// 	new_stream_data.thumbnail_url = `https://i.ytimg.com/vi/${new_stream_data.stream_id}/maxresdefault_live.jpg`
+				// 	new_chat_data.thumbnail_url = '/nimado/youtube_chat_icon.png'
+				// 	break
+				// }
 				case 'twitch': {
-					new_stream_data.src = `https://player.twitch.tv/?muted=true&channel=${new_stream_data.stream_id}&parent=fazerog02.github.io`
-					new_chat_data.src = `https://twitch.tv/embed/${new_stream_data.stream_id}/chat?parent=fazerog02.github.io`
 					new_stream_data.thumbnail_url = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${new_stream_data.stream_id}.jpg`
 					new_chat_data.thumbnail_url = '/nimado/twitch_chat_icon.png'
 					break
@@ -394,6 +376,8 @@ const App = () => {
 						downIndex={() => downIndex(data.index)}
 						gridMode={gridMode}
 						index={data.index}
+						is_mute={allMute}
+						is_play={allPlay}
 						key={`s_${data.stream_id}`}
 						minimizeContent={() => minimizeContent(data.index)}
 						upIndex={() => upIndex(data.index)}
@@ -413,6 +397,8 @@ const App = () => {
 					downIndex={() => downIndex(data.index)}
 					gridMode={gridMode}
 					index={data.index}
+					is_mute={allMute}
+					is_play={allPlay}
 					key={`c_${data.stream_id}`}
 					minimizeContent={() => minimizeContent(data.index)}
 					upIndex={() => upIndex(data.index)}
@@ -576,6 +562,85 @@ const App = () => {
 					</svg>
 				)}
 			</div>
+			<div
+				className='absolute bottom-4 right-4 z-[9999] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-twitch_purple text-white transition-[right] duration-300'
+				onClick={() => {
+					switchAllMute()
+				}}
+				style={bottomMenu ? { right: 'calc(5rem + 256px)' } : {}}
+			>
+				{allMute ? (
+					<svg
+						className='h-8 w-8'
+						fill='none'
+						stroke='currentColor'
+						strokeWidth={2}
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'
+					>
+						<path
+							d='M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.531V19.94a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.506-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.395C2.806 8.757 3.63 8.25 4.51 8.25H6.75z'
+							strokeLinecap='round'
+							strokeLinejoin='round'
+						/>
+					</svg>
+				) : (
+					<svg
+						className='h-8 w-8'
+						fill='none'
+						stroke='currentColor'
+						strokeWidth={2}
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'
+					>
+						<path
+							d='M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z'
+							strokeLinecap='round'
+							strokeLinejoin='round'
+						/>
+					</svg>
+				)}
+			</div>
+			<div
+				className='absolute bottom-4 right-4 z-[9999] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-twitch_purple text-white transition-[right] duration-300'
+				onClick={() => {
+					switchAllPlay()
+				}}
+				style={bottomMenu ? { right: 'calc(6rem + 320px)' } : {}}
+			>
+				{allPlay ? (
+					<svg
+						className='h-8 w-8'
+						fill='none'
+						stroke='currentColor'
+						strokeWidth={2}
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'
+					>
+						<path
+							d='M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z'
+							strokeLinecap='round'
+							strokeLinejoin='round'
+						/>
+					</svg>
+				) : (
+					<svg
+						className='h-8 w-8'
+						fill='none'
+						stroke='currentColor'
+						strokeWidth={2}
+						viewBox='0 0 24 24'
+						xmlns='http://www.w3.org/2000/svg'
+					>
+						<path
+							d='M15.75 5.25v13.5m-7.5-13.5v13.5'
+							strokeLinecap='round'
+							strokeLinejoin='round'
+						/>
+					</svg>
+				)}
+			</div>
+
 			{containers}
 
 			<Popup closePopup={() => setAddPopup(false)} is_open={addPopup} title='配信の追加'>
