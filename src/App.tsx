@@ -384,7 +384,7 @@ const App = () => {
 					/>
 				)
 			})
-	}, [activeContentDataList, gridMode])
+	}, [activeContentDataList, gridMode, allMute, allPlay])
 
 	const chat_containers = useMemo(() => {
 		const active_chat_content_data_list = activeContentDataList.filter(
@@ -405,7 +405,7 @@ const App = () => {
 				/>
 			)
 		})
-	}, [activeContentDataList, gridMode])
+	}, [activeContentDataList, gridMode, allMute, allPlay])
 
 	const containers = useMemo(() => {
 		return stream_containers.concat(chat_containers)
