@@ -13,6 +13,8 @@ interface Props {
 	gridMode: boolean
 	className?: string
 	style?: React.CSSProperties
+	is_play: boolean
+	is_mute: boolean
 }
 
 const StreamContainer = (props: Props) => {
@@ -30,13 +32,16 @@ const StreamContainer = (props: Props) => {
 			editable={editable}
 			gridMode={props.gridMode}
 			index={props.index}
+			is_chat={false}
+			is_mute={props.is_mute}
+			is_play={props.is_play}
 			keepRatio
 			minimizeContent={() => props.minimizeContent()}
 			position={props.content_data.position}
 			setPosition={(position: Position) => props.content_data.setPosition(position)}
 			setSize={(size: Size) => props.content_data.setSize(size)}
 			size={props.content_data.size}
-			src={props.content_data.src}
+			stream_id={props.content_data.stream_id}
 			style={Object.assign(
 				{
 					width: document.body.clientWidth / 2,
