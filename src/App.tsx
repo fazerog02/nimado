@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, ChangeEvent, useRef, KeyboardEvent } from 'react'
+import { useEffect, useMemo, useState, ChangeEvent, useRef, KeyboardEvent, useContext } from 'react'
+import { ShepherdTourContext, Tour } from 'react-shepherd'
 
 import ChatContainer from './components/ChatContainer'
 import MinimizedContainer from './components/MinimizedContainer'
@@ -18,6 +19,8 @@ interface PositionAndSize {
 }
 
 const App = () => {
+	const shepherd_tour = useContext<Tour | null>(ShepherdTourContext)
+
 	const [bottomMenu, setBottomMenu] = useState<boolean>(false)
 	const [addPopup, setAddPopup] = useState<boolean>(false)
 	const [minimizedContentFolder, setMinimizedContentFolder] = useState<boolean>(false)
@@ -446,10 +449,20 @@ const App = () => {
 		}
 	}, [])
 
+	useEffect(() => {
+		if (shepherd_tour !== null) {
+			const first_access = window.localStorage.getItem('first_access') === null ? true : false
+			if (first_access) {
+				shepherd_tour?.start()
+			}
+		}
+	}, [shepherd_tour])
+
 	return (
 		<div className='h-screen w-screen bg-dark'>
 			<div
 				className='absolute bottom-4 right-4 z-[10000] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-twitch_purple text-white'
+				id='bottom_menu_switch'
 				onClick={() => setBottomMenu(!bottomMenu)}
 			>
 				{bottomMenu ? (
